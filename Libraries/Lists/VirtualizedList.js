@@ -19,6 +19,7 @@ const ViewabilityHelper = require('./ViewabilityHelper');
 
 const flattenStyle = require('../StyleSheet/flattenStyle');
 const infoLog = require('../Utilities/infoLog');
+const renderNode = require('../Utilities/renderNode');
 const invariant = require('invariant');
 import VirtualizedListInjection from './VirtualizedListInjection';
 
@@ -902,12 +903,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
       if (stickyIndicesFromProps.has(0)) {
         stickyHeaderIndices.push(0);
       }
-      const element = React.isValidElement(ListHeaderComponent) ? (
-        ListHeaderComponent
-      ) : (
-        // $FlowFixMe
-        <ListHeaderComponent />
-      );
+      const element = renderNode(ListHeaderComponent);
       cells.push(
         <VirtualizedListCellContextProvider
           cellKey={this._getCellKey() + '-header'}
@@ -918,10 +914,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
               inversionStyle,
               this.props.ListHeaderComponentStyle,
             )}>
-            {
-              // $FlowFixMe - Typing ReactNativeComponent revealed errors
-              element
-            }
+            {element}
           </View>
         </VirtualizedListCellContextProvider>,
       );
@@ -1023,14 +1016,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
         );
       }
     } else if (ListEmptyComponent) {
-      const element: React.Element<any> = ((React.isValidElement(
-        ListEmptyComponent,
-      ) ? (
-        ListEmptyComponent
-      ) : (
-        // $FlowFixMe
-        <ListEmptyComponent />
-      )): any);
+      const element: React.Element<any> = (renderNode(ListEmptyComponent): any);
       cells.push(
         React.cloneElement(element, {
           key: '$empty',
@@ -1045,12 +1031,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
       );
     }
     if (ListFooterComponent) {
-      const element = React.isValidElement(ListFooterComponent) ? (
-        ListFooterComponent
-      ) : (
-        // $FlowFixMe
-        <ListFooterComponent />
-      );
+      const element = renderNode(ListFooterComponent);
       cells.push(
         <VirtualizedListCellContextProvider
           cellKey={this._getFooterCellKey()}
@@ -1061,10 +1042,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
               inversionStyle,
               this.props.ListFooterComponentStyle,
             )}>
-            {
-              // $FlowFixMe - Typing ReactNativeComponent revealed errors
-              element
-            }
+            {element}
           </View>
         </VirtualizedListCellContextProvider>,
       );
