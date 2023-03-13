@@ -162,6 +162,7 @@ public class TextLayoutManagerMapBuffer {
             new SetSpanOperation(start, end, new ReactAbsoluteSizeSpan(textAttributes.mFontSize)));
         if (textAttributes.mFontStyle != UNSET
             || textAttributes.mFontWeight != UNSET
+            || textAttributes.mFontVariationSettings != null
             || textAttributes.mFontFamily != null) {
           ops.add(
               new SetSpanOperation(
@@ -170,6 +171,7 @@ public class TextLayoutManagerMapBuffer {
                   new CustomStyleSpan(
                       textAttributes.mFontStyle,
                       textAttributes.mFontWeight,
+                      textAttributes.mFontVariationSettings,
                       textAttributes.mFontFeatureSettings,
                       textAttributes.mFontFamily,
                       context.getAssets())));

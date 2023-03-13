@@ -15,6 +15,7 @@ import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import androidx.annotation.Nullable;
 import com.facebook.common.logging.FLog;
@@ -200,6 +201,7 @@ public abstract class ReactBaseTextShadowNode extends LayoutShadowNode {
       }
       if (textShadowNode.mFontStyle != UNSET
           || textShadowNode.mFontWeight != UNSET
+          || textShadowNode.mFontVariationSettings != null
           || textShadowNode.mFontFamily != null) {
         ops.add(
             new SetSpanOperation(
@@ -208,6 +210,7 @@ public abstract class ReactBaseTextShadowNode extends LayoutShadowNode {
                 new CustomStyleSpan(
                     textShadowNode.mFontStyle,
                     textShadowNode.mFontWeight,
+                    textShadowNode.mFontVariationSettings,
                     textShadowNode.mFontFeatureSettings,
                     textShadowNode.mFontFamily,
                     textShadowNode.getThemedContext().getAssets())));
@@ -353,6 +356,11 @@ public abstract class ReactBaseTextShadowNode extends LayoutShadowNode {
    */
   protected int mFontStyle = UNSET;
 
+  /**
+   * mFontVariationSettings can be used for variable font features e.g: 'wght' 850
+   */
+  protected String mFontVariationSettings;
+  
   protected int mFontWeight = UNSET;
   /**
    * NB: If a font family is used that does not have a style in a certain Android version (ie.
@@ -514,6 +522,7 @@ public abstract class ReactBaseTextShadowNode extends LayoutShadowNode {
 
   @ReactProp(name = ViewProps.FONT_WEIGHT)
   public void setFontWeight(@Nullable String fontWeightString) {
+    Log.d("ReactBaseTextShadowNode", "Font weight: " + fontWeightString);
     int fontWeight = ReactTypefaceUtils.parseFontWeight(fontWeightString);
     if (fontWeight != mFontWeight) {
       mFontWeight = fontWeight;
@@ -527,6 +536,15 @@ public abstract class ReactBaseTextShadowNode extends LayoutShadowNode {
 
     if (!TextUtils.equals(fontFeatureSettings, mFontFeatureSettings)) {
       mFontFeatureSettings = fontFeatureSettings;
+      markUpdated();
+    }
+  }
+
+  @ReactProp(name = ViewProps.FONT_VARIATION_SETTINGS)
+  public void setFontVariationSettings(@Nullable String fontVariationSettings) {
+    Log.d("ReactBaseTextShadowNode", "fontVariationSettings: " + fontVariationSettings);
+    if(fontVariationSettings != mFontVariationSettings) {
+      mFontVariationSettings = fontVariationSettings;
       markUpdated();
     }
   }

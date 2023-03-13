@@ -54,6 +54,8 @@ public class TextAttributeProps {
   public static final short TA_KEY_IS_HIGHLIGHTED = 20;
   public static final short TA_KEY_LAYOUT_DIRECTION = 21;
   public static final short TA_KEY_ACCESSIBILITY_ROLE = 22;
+  public static final short TA_KEY_LINE_BREAK_STRATEGY = 23;
+  public static final short TA_KEY_FONT_VARIATION_SETTINGS = 24;
 
   public static final int UNSET = -1;
 
@@ -129,6 +131,11 @@ public class TextAttributeProps {
    * </pre>
    */
   protected @Nullable String mFontFamily = null;
+  
+  /**
+   * mFontVariationSettings can be used for variable font features e.g: 'wght' 850
+   */
+  protected String mFontVariationSettings = null;
 
   /** @see android.graphics.Paint#setFontFeatureSettings */
   protected @Nullable String mFontFeatureSettings = null;
@@ -206,6 +213,12 @@ public class TextAttributeProps {
         case TA_KEY_ACCESSIBILITY_ROLE:
           result.setAccessibilityRole(entry.getStringValue());
           break;
+        case TA_KEY_LINE_BREAK_STRATEGY:
+          // TODO: add line break strategy
+          break;
+        case TA_KEY_FONT_VARIATION_SETTINGS:
+          result.setFontVariationSettings(entry.getStringValue());
+          break;
       }
     }
 
@@ -235,6 +248,7 @@ public class TextAttributeProps {
             ? props.getInt(ViewProps.BACKGROUND_COLOR, 0)
             : null);
     result.setFontFamily(getStringProp(props, ViewProps.FONT_FAMILY));
+    result.setFontVariationSettings(getStringProp(props, ViewProps.FONT_VARIATION_SETTINGS));
     result.setFontWeight(getStringProp(props, ViewProps.FONT_WEIGHT));
     result.setFontStyle(getStringProp(props, ViewProps.FONT_STYLE));
     result.setFontVariant(getArrayProp(props, ViewProps.FONT_VARIANT));
@@ -414,6 +428,10 @@ public class TextAttributeProps {
     mFontFamily = fontFamily;
   }
 
+  private void setFontVariationSettings(String fontVariationSettings) {
+    mFontVariationSettings = fontVariationSettings;
+  }
+  
   private void setFontVariant(@Nullable ReadableArray fontVariant) {
     mFontFeatureSettings = ReactTypefaceUtils.parseFontVariant(fontVariant);
   }
