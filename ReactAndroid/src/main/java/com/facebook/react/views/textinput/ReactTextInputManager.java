@@ -25,6 +25,9 @@ import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -607,6 +610,29 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
             return _contextMenuHidden;
           };
         });
+    if(_contextMenuHidden){
+      view.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+          menu.clear();
+          return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+          return false;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+          return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) { return; }
+
+      });
+    }
   }
 
   @ReactProp(name = "selectTextOnFocus", defaultBoolean = false)
