@@ -14,9 +14,29 @@
 
 @implementation RCTScrollContentView
 
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+  if (@available(iOS 14.0, *)) {
+    if (@available(iOS 15.0, *)) {
+    } else {
+      RCTScrollView *scrollView = (RCTScrollView *)self.superview.superview;
+      [scrollView updateContentSizeIfNeeded];
+    }
+  }
+}
+
 - (void)reactSetFrame:(CGRect)frame
 {
   [super reactSetFrame:frame];
+  if (@available(iOS 14.0, *)) {
+    if (@available(iOS 15.0, *)) {
+    } else {
+      if (!self.window) {
+        return;
+      }
+    }
+  }
 
   RCTScrollView *scrollView = (RCTScrollView *)self.superview.superview;
 
