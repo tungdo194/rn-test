@@ -76,6 +76,7 @@ public class LayoutShadowNode extends ReactShadowNodeImpl {
   }
 
   private final MutableYogaValue mTempYogaValue;
+  private final Dynamic[] mPosition = new Dynamic[Spacing.INLINE_START + 1];
 
   public LayoutShadowNode() {
     mTempYogaValue = new MutableYogaValue();
@@ -765,6 +766,13 @@ public class LayoutShadowNode extends ReactShadowNodeImpl {
         ViewProps.RIGHT,
         ViewProps.TOP,
         ViewProps.BOTTOM,
+        ViewProps.INSET,
+        ViewProps.INSET_BLOCK,
+        ViewProps.INSET_BLOCK_END,
+        ViewProps.INSET_BLOCK_START,
+        ViewProps.INSET_INLINE,
+        ViewProps.INSET_INLINE_END,
+        ViewProps.INSET_INLINE_START,
       })
   public void setPositionValues(int index, Dynamic position) {
     if (isVirtual()) {
@@ -772,10 +780,69 @@ public class LayoutShadowNode extends ReactShadowNodeImpl {
     }
 
     final int[] POSITION_SPACING_TYPES = {
-      Spacing.START, Spacing.END, Spacing.LEFT, Spacing.RIGHT, Spacing.TOP, Spacing.BOTTOM
+      Spacing.START,
+      Spacing.END,
+      Spacing.LEFT,
+      Spacing.RIGHT,
+      Spacing.TOP,
+      Spacing.BOTTOM,
+      Spacing.ALL_EDGES,
+      Spacing.BLOCK,
+      Spacing.BLOCK_END,
+      Spacing.BLOCK_START,
+      Spacing.INLINE,
+      Spacing.INLINE_END,
+      Spacing.INLINE_START
     };
 
-    int spacingType = maybeTransformLeftRightToStartEnd(POSITION_SPACING_TYPES[index]);
+    mPosition[POSITION_SPACING_TYPES[index]] = position;
+    updatePositionValues();
+  }
+
+  private void updatePositionValues() {
+    setYogaPosition(Spacing.TOP, mPosition[Spacing.TOP]);
+    setYogaPosition(Spacing.BOTTOM, mPosition[Spacing.BOTTOM]);
+    setYogaPosition(Spacing.START, mPosition[Spacing.START]);
+    setYogaPosition(Spacing.END, mPosition[Spacing.END]);
+
+    if (!I18nUtil.getInstance().doLeftAndRightSwapInRTL(getThemedContext())) {
+      setYogaPosition(Spacing.LEFT, mPosition[Spacing.LEFT]);
+      setYogaPosition(Spacing.RIGHT, mPosition[Spacing.RIGHT]);
+    } else {
+      setYogaPosition(Spacing.START, mPosition[Spacing.LEFT]);
+      setYogaPosition(Spacing.END, mPosition[Spacing.RIGHT]);
+    }
+
+    // Aliases with precedence
+    if (mPosition[Spacing.ALL_EDGES] != null && !mPosition[Spacing.ALL_EDGES].isNull()) {
+      setYogaPosition(Spacing.ALL_EDGES, mPosition[Spacing.ALL_EDGES]);
+    }
+    if (mPosition[Spacing.BLOCK] != null && !mPosition[Spacing.BLOCK].isNull()) {
+      setYogaPosition(Spacing.VERTICAL, mPosition[Spacing.BLOCK]);
+    }
+    if (mPosition[Spacing.INLINE] != null && !mPosition[Spacing.INLINE].isNull()) {
+      setYogaPosition(Spacing.HORIZONTAL, mPosition[Spacing.INLINE]);
+    }
+    if (mPosition[Spacing.INLINE_END] != null && !mPosition[Spacing.INLINE_END].isNull()) {
+      setYogaPosition(Spacing.END, mPosition[Spacing.INLINE_END]);
+    }
+    if (mPosition[Spacing.INLINE_START] != null && !mPosition[Spacing.INLINE_START].isNull()) {
+      setYogaPosition(Spacing.START, mPosition[Spacing.INLINE_START]);
+    }
+
+    // Aliases without precedence
+    if (mPosition[Spacing.BOTTOM] == null || mPosition[Spacing.BOTTOM].isNull()) {
+      setYogaPosition(Spacing.BOTTOM, mPosition[Spacing.BLOCK_END]);
+    }
+    if (mPosition[Spacing.TOP] == null || mPosition[Spacing.TOP].isNull()) {
+      setYogaPosition(Spacing.TOP, mPosition[Spacing.BLOCK_START]);
+    }
+  }
+
+  private void setYogaPosition(int spacingType, Dynamic position) {
+    if (position == null){
+      return;
+    }
 
     mTempYogaValue.setFromDynamic(position);
     switch (mTempYogaValue.unit) {

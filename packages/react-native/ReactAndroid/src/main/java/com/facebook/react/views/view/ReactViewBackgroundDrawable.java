@@ -77,7 +77,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
     }
   };
 
-  /* Value at Spacing.ALL index used for rounded borders, whole array used by rectangular borders */
+  /* Value at Spacing.ALL_EDGES index used for rounded borders, whole array used by rectangular borders */
   private @Nullable Spacing mBorderWidth;
   private @Nullable Spacing mBorderRGB;
   private @Nullable Spacing mBorderAlpha;
@@ -211,7 +211,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
     if (!FloatUtil.floatsEqual(mBorderWidth.getRaw(position), width)) {
       mBorderWidth.set(position, width);
       switch (position) {
-        case Spacing.ALL:
+        case Spacing.ALL_EDGES:
         case Spacing.LEFT:
         case Spacing.BOTTOM:
         case Spacing.RIGHT:
@@ -378,7 +378,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
 
       // If it's a full and even border draw inner rect path with stroke
       final float fullBorderWidth = getFullBorderWidth();
-      int borderColor = getBorderColor(Spacing.ALL);
+      int borderColor = getBorderColor(Spacing.ALL_EDGES);
       if (borderWidth.top == fullBorderWidth
           && borderWidth.bottom == fullBorderWidth
           && borderWidth.left == fullBorderWidth
@@ -563,7 +563,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
     int colorTop = getBorderColor(Spacing.TOP);
     int colorRight = getBorderColor(Spacing.RIGHT);
     int colorBottom = getBorderColor(Spacing.BOTTOM);
-    int borderColor = getBorderColor(Spacing.ALL);
+    int borderColor = getBorderColor(Spacing.ALL_EDGES);
     int colorBlock = getBorderColor(Spacing.BLOCK);
     int colorBlockStart = getBorderColor(Spacing.BLOCK_START);
     int colorBlockEnd = getBorderColor(Spacing.BLOCK_END);
@@ -742,7 +742,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
     float extraRadiusForOutline = 0;
 
     if (mBorderWidth != null) {
-      extraRadiusForOutline = mBorderWidth.get(Spacing.ALL) / 2f;
+      extraRadiusForOutline = mBorderWidth.get(Spacing.ALL_EDGES) / 2f;
     }
 
     mPathForBorderRadiusOutline.addRoundRect(
@@ -1091,8 +1091,8 @@ public class ReactViewBackgroundDrawable extends Drawable {
 
   /** For rounded borders we use default "borderWidth" property. */
   public float getFullBorderWidth() {
-    return (mBorderWidth != null && !YogaConstants.isUndefined(mBorderWidth.getRaw(Spacing.ALL)))
-        ? mBorderWidth.getRaw(Spacing.ALL)
+    return (mBorderWidth != null && !YogaConstants.isUndefined(mBorderWidth.getRaw(Spacing.ALL_EDGES)))
+        ? mBorderWidth.getRaw(Spacing.ALL_EDGES)
         : 0f;
   }
 
@@ -1394,7 +1394,7 @@ public class ReactViewBackgroundDrawable extends Drawable {
   }
 
   public RectF getDirectionAwareBorderInsets() {
-    final float borderWidth = getBorderWidthOrDefaultTo(0, Spacing.ALL);
+    final float borderWidth = getBorderWidthOrDefaultTo(0, Spacing.ALL_EDGES);
     final float borderTopWidth = getBorderWidthOrDefaultTo(borderWidth, Spacing.TOP);
     final float borderBottomWidth = getBorderWidthOrDefaultTo(borderWidth, Spacing.BOTTOM);
     float borderLeftWidth = getBorderWidthOrDefaultTo(borderWidth, Spacing.LEFT);
