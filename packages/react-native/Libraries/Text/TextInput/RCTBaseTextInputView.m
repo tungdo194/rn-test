@@ -184,11 +184,42 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
 {
   id<RCTBackedTextInputViewProtocol> backedTextInputView = self.backedTextInputView;
   UITextRange *selectedTextRange = backedTextInputView.selectedTextRange;
+  
+  CGPoint selectionOriginStart = [backedTextInputView caretRectForPosition:selectedTextRange.start].origin;
+  CGRect caretRectEnd = [backedTextInputView caretRectForPosition:selectedTextRange.end];
+  CGPoint selectionOriginEnd = caretRectEnd.origin;
+  CGFloat cursorHeightEnd = caretRectEnd.size.height;
+  CGFloat cursorWidthEnd = caretRectEnd.size.width;
+
+  NSString *formattedStartY = @"0";
+  NSString *formattedStartX = @"0";
+  NSString *formattedEndY = @"0";
+  NSString *formattedEndX = @"0";
+
+  formattedStartY = [self formatPositionValue:selectionOriginStart.y];
+  formattedStartX = [self formatPositionValue:selectionOriginStart.x];
+
+  // We add the height/width of the cursor to the position of the caret to get the bottom right position of the end of the selection
+  formattedEndY = [self formatPositionValue:(selectionOriginEnd.y + cursorHeightEnd)];
+  formattedEndX = [self formatPositionValue:(selectionOriginEnd.x + cursorWidthEnd)];
+
+  NSDictionary *cursorPosition = @{
+    @"start": @{
+      @"x": formattedStartX,
+      @"y": formattedStartY
+    },
+    @"end": @{
+      @"x": formattedEndX,
+      @"y": formattedEndY
+    }
+  };
+
   return [[RCTTextSelection new]
       initWithStart:[backedTextInputView offsetFromPosition:backedTextInputView.beginningOfDocument
                                                  toPosition:selectedTextRange.start]
                 end:[backedTextInputView offsetFromPosition:backedTextInputView.beginningOfDocument
-                                                 toPosition:selectedTextRange.end]];
+                                                 toPosition:selectedTextRange.end]
+       cursorPosition:cursorPosition];
 }
 
 - (void)setSelection:(RCTTextSelection *)selection
@@ -208,7 +239,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
 
   NSInteger eventLag = _nativeEventCount - _mostRecentEventCount;
   if (eventLag == 0 && ![previousSelectedTextRange isEqual:selectedTextRange]) {
-    [backedTextInputView setSelectedTextRange:selectedTextRange notifyDelegate:NO];
+    [self textInputDidChangeSelection];
   } else if (eventLag > RCTTextUpdateLagWarningThreshold) {
     RCTLog(
         @"Native TextInput(%@) is %lld events ahead of JS - try to make your JS faster.",
@@ -518,6 +549,15 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
   }
 }
 
+- (NSString *)formatPositionValue:(CGFloat)positionValue {
+  if (positionValue < 0) {
+    return @"0";
+  }
+  NSInteger roundedValue = round(positionValue);
+  NSString *formattedValue = [NSString stringWithFormat:@"%ld", (long)roundedValue];
+  return formattedValue;
+}
+
 - (void)textInputDidChangeSelection
 {
   if (!_onSelectionChange) {
@@ -526,11 +566,24 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
 
   RCTTextSelection *selection = self.selection;
 
+   NSDictionary *startCursorPosition = selection.cursorPosition[@"start"];
+   NSDictionary *endCursorPosition = selection.cursorPosition[@"end"];
+
   _onSelectionChange(@{
     @"selection" : @{
       @"start" : @(selection.start),
       @"end" : @(selection.end),
-    },
+      @"cursorPosition": @{
+        @"start": @{
+          @"x": startCursorPosition[@"x"],
+          @"y": startCursorPosition[@"y"]
+        },
+        @"end": @{
+          @"x": endCursorPosition[@"x"],
+          @"y": endCursorPosition[@"y"]
+        }
+      }
+    }
   });
 }
 
