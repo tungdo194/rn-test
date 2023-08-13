@@ -51,16 +51,6 @@ public class ReactModalHostManager extends ViewGroupManager<ReactModalHostView>
   }
 
   @Override
-  public LayoutShadowNode createShadowNodeInstance() {
-    return new ModalHostShadowNode();
-  }
-
-  @Override
-  public Class<? extends LayoutShadowNode> getShadowNodeClass() {
-    return ModalHostShadowNode.class;
-  }
-
-  @Override
   public void onDropViewInstance(ReactModalHostView view) {
     super.onDropViewInstance(view);
     view.onDropInstance();
@@ -168,8 +158,6 @@ public class ReactModalHostManager extends ViewGroupManager<ReactModalHostView>
   public Object updateState(
       ReactModalHostView view, ReactStylesDiffMap props, StateWrapper stateWrapper) {
     view.getFabricViewStateManager().setStateWrapper(stateWrapper);
-    Point modalSize = ModalHostHelper.getModalHostSize(view.getContext());
-    view.updateState(modalSize.x, modalSize.y);
     return null;
   }
 
