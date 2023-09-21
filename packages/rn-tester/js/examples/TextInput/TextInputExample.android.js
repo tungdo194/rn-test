@@ -377,36 +377,6 @@ const examples: Array<RNTesterModuleExample> = [
     },
   },
   {
-    title: 'Fixed number of lines',
-    platform: 'android',
-    render: function (): React.Node {
-      return (
-        <View>
-          <TextInput
-            numberOfLines={2}
-            multiline={true}
-            placeholder="Two line input using numberOfLines prop"
-          />
-          <TextInput
-            numberOfLines={5}
-            multiline={true}
-            placeholder="Five line input using numberOfLines prop"
-          />
-          <TextInput
-            rows={2}
-            multiline={true}
-            placeholder="Two line input using rows prop"
-          />
-          <TextInput
-            rows={5}
-            multiline={true}
-            placeholder="Five line input using rows prop"
-          />
-        </View>
-      );
-    },
-  },
-  {
     title: 'Auto-expanding',
     render: function (): React.Node {
       return (

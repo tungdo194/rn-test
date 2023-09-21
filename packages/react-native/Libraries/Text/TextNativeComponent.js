@@ -9,6 +9,7 @@
  */
 
 import {createViewConfig} from '../NativeComponent/ViewConfig';
+import getNativeComponentAttributes from '../ReactNative/getNativeComponentAttributes';
 import UIManager from '../ReactNative/UIManager';
 import createReactNativeComponentClass from '../Renderer/shims/createReactNativeComponentClass';
 import {type HostComponent} from '../Renderer/shims/ReactNativeTypes';
@@ -18,6 +19,7 @@ import {type TextProps} from './TextProps';
 
 type NativeTextProps = $ReadOnly<{
   ...TextProps,
+  maximumNumberOfLines?: ?number,
   isHighlighted?: ?boolean,
   selectionColor?: ?ProcessedColorValue,
   onClick?: ?(event: PressEvent) => mixed,
@@ -31,7 +33,7 @@ const textViewConfig = {
   validAttributes: {
     isHighlighted: true,
     isPressable: true,
-    numberOfLines: true,
+    maximumNumberOfLines: true,
     ellipsizeMode: true,
     allowFontScaling: true,
     dynamicTypeRamp: true,
@@ -72,6 +74,12 @@ export const NativeText: HostComponent<NativeTextProps> =
   (createReactNativeComponentClass('RCTText', () =>
     createViewConfig(textViewConfig),
   ): any);
+
+const jestIsDefined = typeof jest !== 'undefined';
+export const CONTAINS_MAX_NUMBER_OF_LINES_RENAME: boolean = jestIsDefined
+  ? true
+  : getNativeComponentAttributes('RCTText')?.NativeProps
+      ?.maximumNumberOfLines === 'number';
 
 export const NativeVirtualText: HostComponent<NativeTextProps> =
   !global.RN$Bridgeless && !UIManager.hasViewManagerConfig('RCTVirtualText')

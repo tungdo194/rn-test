@@ -375,12 +375,6 @@ export interface TextInputAndroidProps {
   inlineImagePadding?: number | undefined;
 
   /**
-   * Sets the number of lines for a TextInput.
-   * Use it with multiline set to true to be able to fill the lines.
-   */
-  numberOfLines?: number | undefined;
-
-  /**
    * Sets the return key to the label. Use it instead of `returnKeyType`.
    * @platform android
    */
@@ -696,9 +690,27 @@ export interface TextInputProps
   maxLength?: number | undefined;
 
   /**
+   * Sets the maximum number of lines for a TextInput.
+   * Use it with multiline set to true to be able to fill the lines.
+   */
+  maxNumberOfLines?: number | undefined;
+
+  /**
    * If true, the text input can be multiple lines. The default value is false.
    */
   multiline?: boolean | undefined;
+
+  /**
+   * Sets the number of lines for a TextInput.
+   * Use it with multiline set to true to be able to fill the lines.
+   */
+  numberOfLines?: number | undefined;
+
+  /**
+   * Sets the number of rows for a TextInput.
+   * Use it with multiline set to true to be able to fill the lines.
+   */
+  rows?: number | undefined;
 
   /**
    * Callback that is called when the text input is blurred

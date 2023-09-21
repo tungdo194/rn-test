@@ -17,7 +17,11 @@ import flattenStyle from '../StyleSheet/flattenStyle';
 import processColor from '../StyleSheet/processColor';
 import Platform from '../Utilities/Platform';
 import TextAncestor from './TextAncestor';
-import {NativeText, NativeVirtualText} from './TextNativeComponent';
+import {
+  CONTAINS_MAX_NUMBER_OF_LINES_RENAME,
+  NativeText,
+  NativeVirtualText,
+} from './TextNativeComponent';
 import * as React from 'react';
 import {useContext, useMemo, useState} from 'react';
 
@@ -56,6 +60,7 @@ const Text: React.AbstractComponent<
     onStartShouldSetResponder,
     pressRetentionOffset,
     suppressHighlighting,
+    numberOfLines,
     ...restProps
   } = props;
 
@@ -195,13 +200,28 @@ const Text: React.AbstractComponent<
     }
   }
 
-  let numberOfLines = restProps.numberOfLines;
+  let numberOfLinesValue = numberOfLines;
   if (numberOfLines != null && !(numberOfLines >= 0)) {
     console.error(
       `'numberOfLines' in <Text> must be a non-negative number, received: ${numberOfLines}. The value will be set to 0.`,
     );
-    numberOfLines = 0;
+    numberOfLinesValue = 0;
   }
+
+  const numberOfLinesProps = useMemo((): {
+    maximumNumberOfLines?: ?number,
+    numberOfLines?: ?number,
+  } => {
+    if (CONTAINS_MAX_NUMBER_OF_LINES_RENAME) {
+      return {
+        maximumNumberOfLines: numberOfLinesValue,
+      };
+    } else {
+      return {
+        numberOfLines: numberOfLinesValue,
+      };
+    }
+  }, [numberOfLinesValue]);
 
   const hasTextAncestor = useContext(TextAncestor);
 
@@ -241,7 +261,6 @@ const Text: React.AbstractComponent<
       isHighlighted={isHighlighted}
       isPressable={isPressable}
       nativeID={id ?? nativeID}
-      numberOfLines={numberOfLines}
       ref={forwardedRef}
       selectable={_selectable}
       selectionColor={selectionColor}
@@ -252,6 +271,7 @@ const Text: React.AbstractComponent<
       <NativeText
         {...restProps}
         {...eventHandlersForText}
+        {...numberOfLinesProps}
         accessibilityLabel={ariaLabel ?? accessibilityLabel}
         accessibilityState={nativeTextAccessibilityState}
         accessible={
@@ -264,7 +284,6 @@ const Text: React.AbstractComponent<
         ellipsizeMode={ellipsizeMode ?? 'tail'}
         isHighlighted={isHighlighted}
         nativeID={id ?? nativeID}
-        numberOfLines={numberOfLines}
         ref={forwardedRef}
         selectable={_selectable}
         selectionColor={selectionColor}
