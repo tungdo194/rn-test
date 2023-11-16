@@ -8,7 +8,6 @@
 #pragma once
 
 #include <react/renderer/core/EventDispatcher.h>
-#include <react/renderer/core/EventEmitter.h>
 #include <react/renderer/core/InstanceHandle.h>
 #include <react/renderer/core/Props.h>
 #include <react/renderer/core/PropsParserContext.h>
@@ -128,13 +127,9 @@ class ComponentDescriptor {
    * Creates a shadow node family for particular node.
    */
   virtual ShadowNodeFamily::Shared createFamily(
-      const ShadowNodeFamilyFragment& fragment) const = 0;
-
-  /*
-   * Creates an event emitter for particular node.
-   */
-  virtual SharedEventEmitter createEventEmitter(
-      const InstanceHandle::Shared& instanceHandle) const = 0;
+      Tag tag,
+      SurfaceId surfaceId,
+      std::unique_ptr<const InstanceHandle> instanceHandle) const = 0;
 
  protected:
   friend ShadowNode;

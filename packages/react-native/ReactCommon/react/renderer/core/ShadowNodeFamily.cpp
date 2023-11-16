@@ -19,15 +19,15 @@ namespace facebook::react {
 using AncestorList = ShadowNode::AncestorList;
 
 ShadowNodeFamily::ShadowNodeFamily(
-    const ShadowNodeFamilyFragment& fragment,
+    Tag tag,
+    SurfaceId surfaceId,
+    SharedEventEmitter eventEmitter,
     EventDispatcher::Weak eventDispatcher,
     const ComponentDescriptor& componentDescriptor)
     : eventDispatcher_(std::move(eventDispatcher)),
-      tag_(fragment.tag),
-      surfaceId_(fragment.surfaceId),
-      instanceHandle_(fragment.instanceHandle),
-      eventEmitter_(
-          componentDescriptor.createEventEmitter(fragment.instanceHandle)),
+      tag_(tag),
+      surfaceId_(surfaceId),
+      eventEmitter_(std::move(eventEmitter)),
       componentDescriptor_(componentDescriptor),
       componentHandle_(componentDescriptor.getComponentHandle()),
       componentName_(componentDescriptor.getComponentName()) {}
