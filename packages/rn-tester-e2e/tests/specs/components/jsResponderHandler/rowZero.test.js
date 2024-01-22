@@ -8,24 +8,30 @@
  * @format
  */
 
-const {ComponentsScreen} = require('../../screens/components.screen.js');
+const {ComponentsScreen} = require('../../../screens/components.screen.js');
 const {
   JSResponderHandlerComponentScreen,
-} = require('../../screens/components/jsResponderHandlerComponent.screen.js');
+} = require('../../../screens/components/jsResponderHandlerComponent.screen.js');
 
 // fixed variables
 const roweZeroText = 'I am row 0';
 
-describe('Test is checking row zero JSResponderHandler component', () => {
-  test('Should view properly row zero element', async () => {
-    await JSResponderHandlerComponentScreen.scrollUntilJSResponderHandlerComponentIsDisplayed();
+describe('Testing row zero of JSResponderHandler Functionality Testis checking row zero JSResponderHandler component', function () {
+  it('Should search for JSResponderHandler component and check component visibility', async function () {
+    await ComponentsScreen.setValueToSearch('JSResponderHandler');
     expect(
       await ComponentsScreen.checkJSResponderHandlerComponentIsDisplayed(),
     ).toBeTruthy();
+  });
+
+  it('Should click on component element and check visibility of row zero element', async function () {
     await ComponentsScreen.clickJSResponderHandlerComponent();
     expect(
       await JSResponderHandlerComponentScreen.checkRowZeroLabelIsDisplayed(),
     ).toBeTruthy();
+  });
+
+  it('Should check text of row zero element text', async function () {
     expect(await JSResponderHandlerComponentScreen.getRowZeroText()).toContain(
       roweZeroText,
     );

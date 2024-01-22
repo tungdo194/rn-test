@@ -8,10 +8,15 @@
  * @format
  */
 
-import {UtilsSingleton as Utils, iOSLabel} from '../helpers/utils';
+import {
+  UtilsSingleton as Utils,
+  iOSLabel,
+  androidWidget,
+} from '../helpers/utils';
 
 // root level screen in RNTester: Components
 
+const componentScreenHeader = 'Components';
 const buttonComponentLabel = 'Button Simple React Native button component.';
 const activityIndicatorComponentLabel =
   'ActivityIndicator Animated loading indicators.';
@@ -29,8 +34,10 @@ const refreshControlComponentLabel =
   'RefreshControl Adds pull-to-refresh support to a scrollview.';
 const scrollViewSimpleExampleComponentLabel =
   'ScrollViewSimpleExample Component that enables scrolling through child components.';
+const searchInputLabel = 'Search...';
 
 type ComponentsScreenType = {
+  componentScreenHeaderElement: string,
   buttonComponentLabelElement: string,
   activityIndicatorComponentLabelElement: string,
   keyboardAvoidingViewComponentLabelElement: string,
@@ -41,6 +48,7 @@ type ComponentsScreenType = {
   pressableComponentLabelElement: string,
   refreshControlComponentLabelElement: string,
   scrollViewSimpleExampleComponentLabelElement: string,
+  searchInputLabelElement: string,
   checkButtonComponentIsDisplayed: () => Promise<boolean>,
   checkActivityIndicatorComponentIsDisplayed: () => Promise<boolean>,
   checkKeyboardAvoidingViewComponentIsDisplayed: () => Promise<boolean>,
@@ -61,10 +69,15 @@ type ComponentsScreenType = {
   clickPressableComponent: () => Promise<void>,
   clickRefreshControlComponent: () => Promise<void>,
   clickScrollViewSimpleExampleComponent: () => Promise<void>,
+  setValueToSearch: () => Promise<void>,
 };
 
 export const ComponentsScreen: ComponentsScreenType = {
   // Reference in the top level Component list
+  componentScreenHeaderElement: Utils.platformSelect({
+    ios: iOSLabel(componentScreenHeader),
+    android: `~${componentScreenHeader}`,
+  }),
   buttonComponentLabelElement: Utils.platformSelect({
     ios: iOSLabel(buttonComponentLabel),
     android: `~${buttonComponentLabel}`,
@@ -105,7 +118,16 @@ export const ComponentsScreen: ComponentsScreenType = {
     ios: iOSLabel(scrollViewSimpleExampleComponentLabel),
     android: `~${scrollViewSimpleExampleComponentLabel}`,
   }),
+  searchInputLabelElement: Utils.platformSelect({
+    ios: iOSLabel(searchInputLabel),
+    android: androidWidget('EditText', 'text', searchInputLabel),
+  }),
   // Methods to interact with top level elements in the list
+  checkComponentScreenHeaderIsDisplayed: async function (
+    this: ComponentsScreenType,
+  ): Promise<boolean> {
+    return await Utils.checkElementExistence(this.componentScreenHeaderElement);
+  },
   checkButtonComponentIsDisplayed: async function (
     this: ComponentsScreenType,
   ): Promise<boolean> {
@@ -221,5 +243,11 @@ export const ComponentsScreen: ComponentsScreenType = {
     this: ComponentsScreenType,
   ): Promise<void> {
     await Utils.clickElement(this.scrollViewSimpleExampleComponentLabelElement);
+  },
+  setValueToSearch: async function (
+    this: ComponentsScreenType,
+    searchInput: string,
+  ): Promise<void> {
+    await Utils.setElementText(this.searchInputLabelElement, searchInput);
   },
 };

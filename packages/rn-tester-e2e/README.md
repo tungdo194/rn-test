@@ -1,9 +1,8 @@
 # RNTester E2E folder
 
-In this folder we have a the setup for running E2E testing in RNTester via the usage of [Appium](https://appium.io/) and [WebDriverIO](https://webdriver.io/) and [Jest](https://jestjs.io/).
+In this folder we have a the setup for running E2E testing in RNTester via the usage of [Appium](https://appium.io/) and [WebDriverIO](https://webdriver.io/).
 
 - [Setting up locally](#setting-up-locally)
-  - [(one-off) Setting up Appium](#one-off-setting-up-appium)
   - [Building RNTester app](#building-rntester-app)
     - [Building for iOS](#building-for-ios)
     - [Building for Android](#building-for-android)
@@ -13,19 +12,6 @@ In this folder we have a the setup for running E2E testing in RNTester via the u
 
 ## Setting up locally
 
-### (one-off) Setting up Appium
-
-The first step you need to do is to ensure to install the tooling:
-
-```bash
-npm install appium@2.0.0 -g
-appium driver install uiautomator2
-appium driver install xcuitest
-```
-
-> More details about drivers in Appium [here](https://appium.github.io/appium/docs/en/2.0/guides/managing-exts/) and [here](https://appium.github.io/appium/docs/en/2.0/quickstart/uiauto2-driver/)
-
-You should not need to run install commands for drivers separately more than once, even if you bump the dep in package.json.
 
 ### Building RNTester app
 
@@ -90,13 +76,7 @@ And modify lines L24->L39 to reflect your local setup configuration (ex. `platfo
 
 ## Testing the RNTester app E2E
 
-After you have done all the above correctly, and you have the Android/iOS apps in the `rn-tester-e2e/apps` folder, in a dedicated terminal window, run:
-
-```bash
-appium --base-path /wd/hub
-```
-
-This will start the Appium server - you will need this to keep running.
+After you have done all the above correctly, and you have the Android/iOS apps in the `rn-tester-e2e/apps` folder.
 
 Then open a second terminal window and start the Metro terminal from the `packages/rn-tester` folder, via `yarn start --reset-cache`. This terminal window also needs to keep running.
 
@@ -105,8 +85,8 @@ Now, make sure that the iOS simulator/the Android emulator is up and running.
 Finally, you can open a third terminal window and run:
 
 ```bash
-yarn test-e2e android # for android
-yarn test-e2e ios # for ios
+yarn test-e2e-android # for android
+yarn test-e2e-ios # for ios
 ```
 
 Now you should see the RNTester app being open, and the defined test being run.
@@ -119,6 +99,6 @@ This project has 2 main folders:
 
 - `tests`, where the tests and referencing files all live. The substructure is as follows:
   - `screens` -> in this folder, you will find `*.screen.js` files, where each file represents a navigation screen for RNTester. So there are 3 root ones (`apis`, `bookmarks`, `components`) and then for subscreens, there's a folder with the same name - currently, that's only `components` that contains `buttonComponent.screen.js`. The content of these files is what was earlier mentioned as "references": they provide an easy way to define all elements present in said screen, so that they can be used for tests.
-  - `specs` -> this folder follows a similar 1:1 mapping to the RNTester screens, but for the tests: for each screen (or subscreen) there's a dedicated `*.test.js` file (such as `buttonComponentScreen.test.js`). Ideally, in this file the Jest tests are standard, leveraging the `*.screen.js` counterpart for the details of defining how Appium/WDIO can reach those elements on screen.
+  - `specs` -> this folder follows a similar 1:1 mapping to the RNTester screens, but for the tests: for each screen (or subscreen) there's a dedicated folder file and within it theres test file (such as `invertedFlatList.test.js`).
 
 When adding a new test, please ensure that you follow this pattern and add the relevant test in the right screen file / screen test file. Use the files mentioned above as examples.

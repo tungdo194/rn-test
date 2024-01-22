@@ -8,8 +8,6 @@
  * @format
  */
 
-import {driver} from '../../jest.setup';
-
 type PlatformsReference = {
   ios: string,
   android: string,
@@ -17,31 +15,35 @@ type PlatformsReference = {
 
 class Utils {
   async checkElementExistence(locator: string): Promise<boolean> {
-    await driver.$(locator).waitForDisplayed();
-    return driver.$(locator).isDisplayed();
+    await $(locator).waitForDisplayed();
+    return $(locator).isDisplayed();
   }
 
   async clickElement(locator: string): Promise<void> {
-    await driver.$(locator).waitForDisplayed();
-    await driver.$(locator).click();
+    await $(locator).waitForDisplayed();
+    await $(locator).click();
   }
 
   async getElementText(locator: string): Promise<string> {
-    await driver.$(locator).waitForDisplayed();
-    return driver.$(locator).getText();
+    await $(locator).waitForDisplayed();
+    return $(locator).getText();
+  }
+
+  async setElementText(locator: string, text: string): Promise<void> {
+    await $(locator).waitForDisplayed();
+    return $(locator).setValue(text);
   }
 
   platformSelect(platforms: PlatformsReference): string {
-    // if something goes wrong, we fallback to ios. But it should never happent, the process will fail way earlier.
-    return platforms[process?.env?.E2E_DEVICE || 'ios'];
+    return platforms[browser.capabilities.platformName.toLowerCase()];
   }
 
   async scrollToElement(locator: string): Promise<void> {
     let {width, height} = await driver.getWindowSize();
     let elementIsFound;
     try {
-      elementIsFound = await driver.$(locator).isDisplayed();
-      while (!elementIsFound) {
+      elementIsFound = await $(locator).isClickable();
+      while (!(await elementIsFound)) {
         driver.touchPerform([
           {
             action: 'press',
@@ -67,7 +69,7 @@ class Utils {
             action: 'release',
           },
         ]);
-        elementIsFound = await driver.$(locator).isDisplayed();
+        elementIsFound = await $(locator).isClickable();
       }
     } catch (err) {
       console.log('Element is not found');

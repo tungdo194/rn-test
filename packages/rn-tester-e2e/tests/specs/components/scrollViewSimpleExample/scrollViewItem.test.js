@@ -8,17 +8,20 @@
  * @format
  */
 
-const {ComponentsScreen} = require('../../screens/components.screen.js');
+const {ComponentsScreen} = require('../../../screens/components.screen.js');
 const {
   ScrollViewSimpleExampleComponentScreen,
-} = require('../../screens/components/scrollViewSimpleExampleComponent.screen.js');
+} = require('../../../screens/components/scrollViewSimpleExampleComponent.screen.js');
 
-describe('Test is checking ScrollVIewSimpleExample component', () => {
-  test('Should view scroll view item element', async () => {
-    await ScrollViewSimpleExampleComponentScreen.scrollUntilScrollViewSimpleExampleComponentIsDisplayed();
+describe('Testing first item visibility of ScrollViewSimpleExample Component', function () {
+  it('Should search for the Scroll View Simple Example component and check if displayed', async function () {
+    await ComponentsScreen.setValueToSearch('ScrollViewSimpleExample');
     expect(
       await ComponentsScreen.checkScrollViewSimpleExampleComponentIsDisplayed(),
     ).toBeTruthy();
+  });
+
+  it('Should click on the Scroll View Simple Example component and verify if displayed', async function () {
     await ComponentsScreen.clickScrollViewSimpleExampleComponent();
     expect(
       await ScrollViewSimpleExampleComponentScreen.checkScrollViewItemsDisplayed(),
