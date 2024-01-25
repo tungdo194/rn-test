@@ -42,6 +42,65 @@ class ToggleDefaultPaddingExample extends React.Component<
   }
 }
 
+class LineHeightExample extends React.Component<
+  $FlowFixMeProps,
+  $FlowFixMeState,
+> {
+  /* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
+   * LTI update could not be added via codemod */
+  constructor(props) {
+    super(props);
+    this.state = {value: '', valueMultiline: ''};
+  }
+
+  render(): React.Node {
+    return (
+      <View>
+        <TextInput
+          style={[styles.singleLine, {lineHeight: 10}]}
+          value={this.state.value}
+          onChangeText={value => this.setState({value})}
+          placeholder="lineHeight = 10"
+        />
+        <TextInput
+          style={[styles.singleLine, {lineHeight: 20}]}
+          value={this.state.value}
+          onChangeText={value => this.setState({value})}
+          placeholder="lineHeight = 20"
+        />
+        <TextInput
+          style={[styles.singleLine, {lineHeight: 40}]}
+          value={this.state.value}
+          onChangeText={value => this.setState({value})}
+          placeholder="lineHeight = 40"
+        />
+        <TextInput
+          style={[styles.singleLine, {lineHeight: 60}]}
+          value={this.state.value}
+          onChangeText={value => this.setState({value})}
+          placeholder="lineHeight = 60"
+        />
+        <TextInput
+          multiline
+          style={[
+            styles.singleLine,
+            {
+              lineHeight: 40,
+              height: 200,
+              borderColor: 'black',
+              borderWidth: 1,
+              textAlignVertical: 'top',
+            },
+          ]}
+          value={this.state.valueMultiline}
+          onChangeText={value => this.setState({valueMultiline: value})}
+          placeholder="lineHeight = 40 + multiline"
+        />
+      </View>
+    );
+  }
+}
+
 class AutogrowingTextInputExample extends React.Component<{...}> {
   /* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
    * LTI update could not be added via codemod */
@@ -280,6 +339,12 @@ const examples: Array<RNTesterModuleExample> = [
           />
         </View>
       );
+    },
+  },
+  {
+    title: 'lineHeight',
+    render: function (): React.Node {
+      return <LineHeightExample />;
     },
   },
   {
