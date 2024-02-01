@@ -302,7 +302,8 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
         @"shipmentTrackingNumber" : UITextContentTypeShipmentTrackingNumber,
       }];
     }
-
+      
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000 /* __IPHONE_17_0 */
     if (@available(iOS 17.0, *)) {
       [mutableContentTypeMap addEntriesFromDictionary:@{
         @"creditCardExpiration" : UITextContentTypeCreditCardExpiration,
@@ -320,7 +321,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
         @"birthdateYear" : UITextContentTypeBirthdateYear,
       }];
     }
-      
+#endif
 
     contentTypeMap = mutableContentTypeMap;
   });
