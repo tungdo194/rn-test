@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-package com.facebook.react.defaults
+package com.facebook.react.runtime
 
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
@@ -14,6 +14,7 @@ import com.facebook.react.ReactPackageTurboModuleManagerDelegate
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.common.annotations.UnstableReactNativeAPI
 import com.facebook.react.runtime.cxxreactpackage.CxxReactPackage
+import com.facebook.soloader.SoLoader
 
 /**
  * A utility class that allows you to simplify the setup of a
@@ -37,16 +38,11 @@ private constructor(
 
   class Builder : ReactPackageTurboModuleManagerDelegate.Builder() {
     private var cxxReactPackageProviders:
-        MutableList<((context: ReactApplicationContext) -> CxxReactPackage)> =
+        MutableList<((context: ReactApplicationContext) -> List<CxxReactPackage>)> =
         mutableListOf()
 
-    fun addCxxReactPackage(provider: () -> CxxReactPackage): Builder {
-      cxxReactPackageProviders.add({ _ -> provider() })
-      return this
-    }
-
-    fun addCxxReactPackage(
-        provider: (context: ReactApplicationContext) -> CxxReactPackage
+    fun addCxxReactPackages(
+        provider: (context: ReactApplicationContext) -> List<CxxReactPackage>
     ): Builder {
       cxxReactPackageProviders.add(provider)
       return this
@@ -56,10 +52,8 @@ private constructor(
         context: ReactApplicationContext,
         packages: List<ReactPackage>
     ): DefaultTurboModuleManagerDelegate {
-      val cxxReactPackages = mutableListOf<CxxReactPackage>()
-      for (cxxReactPackageProvider in cxxReactPackageProviders) {
-        cxxReactPackages.add(cxxReactPackageProvider(context))
-      }
+      val cxxReactPackages =
+          cxxReactPackageProviders.map { provider -> provider(context) }.flatten()
 
       return DefaultTurboModuleManagerDelegate(context, packages, cxxReactPackages)
     }
@@ -67,7 +61,8 @@ private constructor(
 
   companion object {
     init {
-      DefaultSoLoader.maybeLoadSoLibrary()
+      // loads the DefaultTurboModuleManagerDelegate.cpp
+      SoLoader.loadLibrary("react_defaults")
     }
 
     @DoNotStrip
