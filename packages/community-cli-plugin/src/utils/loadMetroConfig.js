@@ -12,6 +12,7 @@
 import type {Config} from '@react-native-community/cli-types';
 import type {ConfigT, InputConfigT, YargArguments} from 'metro-config';
 
+import {getWorkspaceRoot} from './getWorkspaceRoot';
 import {reactNativePlatformResolver} from './metroPlatformResolver';
 import {CLIError, logger} from '@react-native-community/cli-tools';
 import {loadConfig, mergeConfig, resolveConfig} from 'metro-config';
@@ -53,7 +54,20 @@ function getOverrideConfig(
     );
   }
 
-  return {
+  // Always include the project root as a watch folder, since Metro expects this
+  const watchFolders = [config.projectRoot];
+
+  if (typeof config.watchFolders !== 'undefined') {
+    watchFolders.push(...config.watchFolders);
+  } else {
+    // Fallback to inferring a workspace root
+    const workspaceRoot = getWorkspaceRoot(ctx.root);
+    if (typeof workspaceRoot === 'string') {
+      watchFolders.push(workspaceRoot);
+    }
+  }
+
+  const overrides: InputConfigT = {
     resolver,
     serializer: {
       // We can include multiple copies of InitializeCore here because metro will
@@ -71,7 +85,10 @@ function getOverrideConfig(
         ),
       ],
     },
+    watchFolders,
   };
+
+  return overrides;
 }
 
 /**
@@ -108,10 +125,16 @@ This warning will be removed in future (https://github.com/facebook/metro/issues
     }
   }
 
-  const config = await loadConfig({
-    cwd,
-    ...options,
-  });
+  const config = await loadConfig(
+    {
+      cwd,
+      ...options,
+    },
+    {
+      // Enables users to explicitly specify watchFolders
+      watchFolders: undefined,
+    },
+  );
 
   const overrideConfig = getOverrideConfig(ctx, config);
 
