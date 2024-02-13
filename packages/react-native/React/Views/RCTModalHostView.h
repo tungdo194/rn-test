@@ -36,11 +36,13 @@
 
 @property (nonatomic, copy) NSArray<NSString *> *supportedOrientations;
 @property (nonatomic, copy) RCTDirectEventBlock onOrientationChange;
+@property (nonatomic, strong) UIWindow *modalWindow;
 
 // Fabric only
 @property (nonatomic, copy) RCTDirectEventBlock onDismiss;
 
 - (instancetype)initWithBridge:(RCTBridge *)bridge NS_DESIGNATED_INITIALIZER;
+- (void)dismissModalViewControllerWithCompletion:(void (^)(void))completion;
 
 @end
 
@@ -52,5 +54,8 @@
 - (void)dismissModalHostView:(RCTModalHostView *)modalHostView
           withViewController:(RCTModalHostViewController *)viewController
                     animated:(BOOL)animated;
+- (void)dismissModalHostViewWithCompletion:(RCTModalHostView *)modalHostView
+          withViewController:(RCTModalHostViewController *)viewController
+                    animated:(BOOL)animated completion: (void (^)(void))completion;
 
 @end

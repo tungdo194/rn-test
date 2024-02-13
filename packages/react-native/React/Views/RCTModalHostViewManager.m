@@ -79,9 +79,59 @@ RCT_EXPORT_MODULE()
     if (self->_presentationBlock) {
       self->_presentationBlock([modalHostView reactViewController], viewController, animated, completionBlock);
     } else {
-      [[modalHostView reactViewController] presentViewController:viewController
-                                                        animated:animated
-                                                      completion:completionBlock];
+      UIViewController* presentingViewController;
+      // pageSheet and formSheet presentation style animate the presented view so we need to use the last presented view controller
+      // For other presentation styles we use the new window
+      if (modalHostView.presentationStyle == UIModalPresentationPageSheet || modalHostView.presentationStyle == UIModalPresentationFormSheet) {
+        UIViewController *lastPresentedViewController = RCTKeyWindow().rootViewController;
+        UIViewController *presentedViewController = nil;
+        while (lastPresentedViewController != nil) {
+          presentedViewController = lastPresentedViewController;
+          lastPresentedViewController = lastPresentedViewController.presentedViewController;
+        }
+        presentingViewController = presentedViewController;
+      } else {
+        modalHostView.modalWindow = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+        modalHostView.modalWindow.windowLevel = UIWindowLevelAlert;
+        UIViewController *newViewController = [[UIViewController alloc] init];
+        modalHostView.modalWindow.rootViewController = newViewController;
+        [modalHostView.modalWindow makeKeyAndVisible];
+        presentingViewController = newViewController;
+      }
+      [presentingViewController presentViewController:viewController animated:animated completion:completionBlock];
+    }
+  });
+}
+
+- (void)dismissModalHostViewWithCompletion:(RCTModalHostView *)modalHostView
+          withViewController:(RCTModalHostViewController *)viewController
+                    animated:(BOOL)animated completion:(void (^)(void))completion
+{
+  dispatch_block_t completionBlock = ^{
+    if (modalHostView.identifier) {
+      [[self.bridge moduleForClass:[RCTModalManager class]] modalDismissed:modalHostView.identifier];
+    }
+    if (completion) {
+      completion();
+    }
+    modalHostView.modalWindow = nil;
+  };
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (self->_dismissalBlock) {
+      self->_dismissalBlock([modalHostView reactViewController], viewController, animated, completionBlock);
+    } else {
+      // Will be true for pageSheet and formSheet presentation styles
+      // We dismiss the nested modal and then dismiss the current modal
+      if (viewController.presentedViewController != nil && [viewController.presentedViewController isKindOfClass:[RCTModalHostViewController class]]) {
+        RCTModalHostViewController* presentedModalViewController = (RCTModalHostViewController *)viewController.presentedViewController;
+        dispatch_block_t childModalCompletionBlock = ^{
+          [viewController.presentingViewController dismissViewControllerAnimated:animated completion:completionBlock];
+        };
+
+        [presentedModalViewController.modalHostView dismissModalViewControllerWithCompletion: childModalCompletionBlock];
+      } else {
+        [viewController.presentingViewController dismissViewControllerAnimated:animated completion:completionBlock];
+      }
     }
   });
 }
@@ -90,18 +140,7 @@ RCT_EXPORT_MODULE()
           withViewController:(RCTModalHostViewController *)viewController
                     animated:(BOOL)animated
 {
-  dispatch_block_t completionBlock = ^{
-    if (modalHostView.identifier) {
-      [[self.bridge moduleForClass:[RCTModalManager class]] modalDismissed:modalHostView.identifier];
-    }
-  };
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (self->_dismissalBlock) {
-      self->_dismissalBlock([modalHostView reactViewController], viewController, animated, completionBlock);
-    } else {
-      [viewController.presentingViewController dismissViewControllerAnimated:animated completion:completionBlock];
-    }
-  });
+  [self dismissModalHostViewWithCompletion:modalHostView withViewController:viewController animated:animated completion:nil];
 }
 
 - (RCTShadowView *)shadowView
