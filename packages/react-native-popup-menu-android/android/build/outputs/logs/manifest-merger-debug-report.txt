@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml:2:13-83
+INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml:2:13-83
+	package
+		INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml
+	xmlns:android
+		ADDED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml:2:23-81
+uses-sdk
+INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml reason: use-sdk injection requested
+INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml
+INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml
+	android:targetSdkVersion
+		INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml
+	android:minSdkVersion
+		INJECTED from /Users/ramanpreet/fbsource/xplat/js/react-native-github/packages/react-native-popup-menu-android/android/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest4016039643555032869.xml
