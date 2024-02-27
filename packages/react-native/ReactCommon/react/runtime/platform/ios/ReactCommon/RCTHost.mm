@@ -212,9 +212,11 @@ class RCTHostHostTargetDelegate : public facebook::react::jsinspector_modern::Ho
                                              mode:(DisplayMode)displayMode
                                 initialProperties:(NSDictionary *)properties
 {
+  NSMutableDictionary *resolvedProps = [properties mutableCopy];
+  resolvedProps[@"concurrentRoot"] = @YES;
   RCTFabricSurface *surface = [[RCTFabricSurface alloc] initWithSurfacePresenter:[self getSurfacePresenter]
                                                                       moduleName:moduleName
-                                                               initialProperties:properties];
+                                                               initialProperties:resolvedProps];
   surface.surfaceHandler.setDisplayMode(displayMode);
   [self _attachSurface:surface];
 
