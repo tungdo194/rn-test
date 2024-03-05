@@ -82,6 +82,13 @@ using TextMeasureCache = SimpleThreadSafeCache<
     TextMeasurement,
     kSimpleThreadSafeCacheSizeCap>;
 
+inline bool areAttributedStringsEquivalentLayoutWise(
+    const AttributedString& lhs,
+    const AttributedString& rhs);
+
+inline size_t attributedStringHashLayoutWise(
+    const AttributedString& attributedString);
+
 inline bool areTextAttributesEquivalentLayoutWise(
     const TextAttributes& lhs,
     const TextAttributes& rhs) {
@@ -128,9 +135,39 @@ inline size_t textAttributesHashLayoutWise(
       textAttributes.alignment);
 }
 
-inline bool areAttributedStringFragmentsEquivalentLayoutWise(
-    const AttributedString::Fragment& lhs,
-    const AttributedString::Fragment& rhs) {
+inline bool areSpanAttributesEquivalentLayoutWise(
+    const SpanAttributes& lhs,
+    const SpanAttributes& rhs) {
+  return areTextAttributesEquivalentLayoutWise(
+      lhs.textAttributes, rhs.textAttributes);
+}
+
+inline size_t spanAttributesHashLayoutWise(
+    const SpanAttributes& spanAttributes) {
+  // Taking into account the same props as
+  // `areSpanAttributesEquivalentLayoutWise` mentions.
+  return textAttributesHashLayoutWise(spanAttributes.textAttributes);
+}
+
+inline bool areAttributedStringSpanFragmentsEquivalentLayoutWise(
+    const AttributedString::SpanFragment& lhs,
+    const AttributedString::SpanFragment& rhs) {
+  return areAttributedStringsEquivalentLayoutWise(
+             lhs.attributedSubstring, rhs.attributedSubstring) &&
+      areSpanAttributesEquivalentLayoutWise(
+             lhs.spanAttributes, rhs.spanAttributes);
+}
+
+inline size_t attributedStringSpanFragmentHashLayoutWise(
+    const AttributedString::SpanFragment& fragment) {
+  return facebook::react::hash_combine(
+      attributedStringHashLayoutWise(fragment.attributedSubstring),
+      spanAttributesHashLayoutWise(fragment.spanAttributes));
+}
+
+inline bool areAttributedStringTextFragmentsEquivalentLayoutWise(
+    const AttributedString::TextFragment& lhs,
+    const AttributedString::TextFragment& rhs) {
   return lhs.string == rhs.string &&
       areTextAttributesEquivalentLayoutWise(
              lhs.textAttributes, rhs.textAttributes) &&
@@ -141,13 +178,41 @@ inline bool areAttributedStringFragmentsEquivalentLayoutWise(
         rhs.parentShadowView.layoutMetrics));
 }
 
-inline size_t attributedStringFragmentHashLayoutWise(
-    const AttributedString::Fragment& fragment) {
+inline size_t attributedStringTextFragmentHashLayoutWise(
+    const AttributedString::TextFragment& fragment) {
   // Here we are not taking `isAttachment` and `layoutMetrics` into account
   // because they are logically interdependent and this can break an invariant
   // between hash and equivalence functions (and cause cache misses).
   return facebook::react::hash_combine(
       fragment.string, textAttributesHashLayoutWise(fragment.textAttributes));
+}
+
+inline bool areAttributedStringFragmentsEquivalentLayoutWise(
+    const AttributedString::Fragment& lhs,
+    const AttributedString::Fragment& rhs) {
+  if (lhs.getKind() == AttributedString::Fragment::Kind::Text &&
+      rhs.getKind() == AttributedString::Fragment::Kind::Text) {
+    return areAttributedStringTextFragmentsEquivalentLayoutWise(
+        lhs.asText(), rhs.asText());
+  }
+
+  if (lhs.getKind() == AttributedString::Fragment::Kind::Span &&
+      rhs.getKind() == AttributedString::Fragment::Kind::Span) {
+    return areAttributedStringSpanFragmentsEquivalentLayoutWise(
+        lhs.asSpan(), rhs.asSpan());
+  }
+
+  return false;
+}
+
+inline size_t attributedStringFragmentHashLayoutWise(
+    const AttributedString::Fragment& fragment) {
+  switch (fragment.getKind()) {
+    case AttributedString::Fragment::Kind::Text:
+      return attributedStringTextFragmentHashLayoutWise(fragment.asText());
+    case AttributedString::Fragment::Kind::Span:
+      return attributedStringSpanFragmentHashLayoutWise(fragment.asSpan());
+  }
 }
 
 inline bool areAttributedStringsEquivalentLayoutWise(

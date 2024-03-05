@@ -36,7 +36,7 @@ import com.facebook.react.internal.featureflags.ReactNativeFeatureFlags;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ReactAccessibilityDelegate.AccessibilityRole;
 import com.facebook.react.uimanager.ReactAccessibilityDelegate.Role;
-import com.facebook.react.views.text.fragments.MapBufferTextFragmentList;
+import com.facebook.react.views.text.fragments.MapBufferStringFragmentList;
 import com.facebook.react.views.text.internal.span.CustomLetterSpacingSpan;
 import com.facebook.react.views.text.internal.span.CustomLineHeightSpan;
 import com.facebook.react.views.text.internal.span.CustomStyleSpan;
@@ -67,12 +67,21 @@ public class TextLayoutManagerMapBuffer {
   public static final short AS_KEY_CACHE_ID = 3;
 
   // constants for Fragment serialization
-  public static final short FR_KEY_STRING = 0;
-  public static final short FR_KEY_REACT_TAG = 1;
-  public static final short FR_KEY_IS_ATTACHMENT = 2;
-  public static final short FR_KEY_WIDTH = 3;
-  public static final short FR_KEY_HEIGHT = 4;
-  public static final short FR_KEY_TEXT_ATTRIBUTES = 5;
+  public static final short FR_KEY_KIND = 0;
+  public static final short FR_VALUE_KIND_TEXT = 0;
+  public static final short FR_VALUE_KIND_SPAN = 1;
+
+  // constants for TextFragment serialization
+  public static final short TF_KEY_STRING = 1;
+  public static final short TF_KEY_REACT_TAG = 2;
+  public static final short TF_KEY_IS_ATTACHMENT = 3;
+  public static final short TF_KEY_WIDTH = 4;
+  public static final short TF_KEY_HEIGHT = 5;
+  public static final short TF_KEY_TEXT_ATTRIBUTES = 6;
+
+  // constants for SpanFragment serialization
+  public static final short SF_KEY_FRAGMENTS = 1;
+  public static final short SF_KEY_SPAN_ATTRIBUTES = 2;
 
   // constants for ParagraphAttributes serialization
   public static final short PA_KEY_MAX_NUMBER_OF_LINES = 0;
@@ -127,7 +136,7 @@ public class TextLayoutManagerMapBuffer {
     }
 
     MapBuffer fragment = fragments.getMapBuffer(0);
-    MapBuffer textAttributes = fragment.getMapBuffer(FR_KEY_TEXT_ATTRIBUTES);
+    MapBuffer textAttributes = fragment.getMapBuffer(TF_KEY_TEXT_ATTRIBUTES);
 
     if (!textAttributes.contains(TextAttributeProps.TA_KEY_LAYOUT_DIRECTION)) {
       return false;
@@ -152,20 +161,23 @@ public class TextLayoutManagerMapBuffer {
 
     for (int i = 0, length = fragments.getCount(); i < length; i++) {
       MapBuffer fragment = fragments.getMapBuffer(i);
+
+      if (fragment.getInt(FR_KEY_KIND) != FR_VALUE_KIND_TEXT) continue;
+
       int start = sb.length();
 
       TextAttributeProps textAttributes =
-          TextAttributeProps.fromMapBuffer(fragment.getMapBuffer(FR_KEY_TEXT_ATTRIBUTES));
+          TextAttributeProps.fromMapBuffer(fragment.getMapBuffer(TF_KEY_TEXT_ATTRIBUTES));
 
       sb.append(
-          TextTransform.apply(fragment.getString(FR_KEY_STRING), textAttributes.mTextTransform));
+          TextTransform.apply(fragment.getString(TF_KEY_STRING), textAttributes.mTextTransform));
 
       int end = sb.length();
       int reactTag =
-          fragment.contains(FR_KEY_REACT_TAG) ? fragment.getInt(FR_KEY_REACT_TAG) : View.NO_ID;
-      if (fragment.contains(FR_KEY_IS_ATTACHMENT) && fragment.getBoolean(FR_KEY_IS_ATTACHMENT)) {
-        float width = PixelUtil.toPixelFromSP(fragment.getDouble(FR_KEY_WIDTH));
-        float height = PixelUtil.toPixelFromSP(fragment.getDouble(FR_KEY_HEIGHT));
+          fragment.contains(TF_KEY_REACT_TAG) ? fragment.getInt(TF_KEY_REACT_TAG) : View.NO_ID;
+      if (fragment.contains(TF_KEY_IS_ATTACHMENT) && fragment.getBoolean(TF_KEY_IS_ATTACHMENT)) {
+        float width = PixelUtil.toPixelFromSP(fragment.getDouble(TF_KEY_WIDTH));
+        float height = PixelUtil.toPixelFromSP(fragment.getDouble(TF_KEY_HEIGHT));
         ops.add(
             new SetSpanOperation(
                 sb.length() - INLINE_VIEW_PLACEHOLDER.length(),
@@ -244,7 +256,7 @@ public class TextLayoutManagerMapBuffer {
   private static void buildSpannableFromFragmentsUnified(
       Context context, MapBuffer fragments, SpannableStringBuilder sb, List<SetSpanOperation> ops) {
 
-    final MapBufferTextFragmentList textFragmentList = new MapBufferTextFragmentList(fragments);
+    final MapBufferStringFragmentList textFragmentList = new MapBufferStringFragmentList(fragments);
 
     TextLayoutUtils.buildSpannableFromTextFragmentList(context, textFragmentList, sb, ops);
   }

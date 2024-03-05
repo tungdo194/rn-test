@@ -15,8 +15,10 @@ import android.view.View
 import com.facebook.react.common.ReactConstants
 import com.facebook.react.uimanager.PixelUtil
 import com.facebook.react.uimanager.ReactAccessibilityDelegate
+import com.facebook.react.views.text.fragments.SpanFragment
+import com.facebook.react.views.text.fragments.StringFragment
 import com.facebook.react.views.text.fragments.TextFragment
-import com.facebook.react.views.text.fragments.TextFragmentList
+import com.facebook.react.views.text.fragments.StringFragmentList
 import com.facebook.react.views.text.internal.span.CustomLetterSpacingSpan
 import com.facebook.react.views.text.internal.span.CustomLineHeightSpan
 import com.facebook.react.views.text.internal.span.CustomStyleSpan
@@ -24,6 +26,7 @@ import com.facebook.react.views.text.internal.span.ReactAbsoluteSizeSpan
 import com.facebook.react.views.text.internal.span.ReactBackgroundColorSpan
 import com.facebook.react.views.text.internal.span.ReactClickableSpan
 import com.facebook.react.views.text.internal.span.ReactForegroundColorSpan
+import com.facebook.react.views.text.internal.span.ReactSpanSpan
 import com.facebook.react.views.text.internal.span.ReactStrikethroughSpan
 import com.facebook.react.views.text.internal.span.ReactTagSpan
 import com.facebook.react.views.text.internal.span.ReactUnderlineSpan
@@ -37,15 +40,15 @@ internal object TextLayoutUtils {
 
   @JvmStatic
   fun buildSpannableFromTextFragmentList(
-      context: Context,
-      textFragmentList: TextFragmentList,
-      sb: SpannableStringBuilder,
-      ops: MutableList<SetSpanOperation>,
+    context: Context,
+    textFragmentList: StringFragmentList,
+    sb: SpannableStringBuilder,
+    ops: MutableList<SetSpanOperation>,
   ) {
     for (i in 0 until textFragmentList.count) {
       val fragment = textFragmentList.getFragment(i)
 
-      addApplicableFragmentSpans(
+      addApplicableStringFragmentSpans(
           context = context,
           fragment = fragment,
           sb = sb,
@@ -54,7 +57,29 @@ internal object TextLayoutUtils {
     }
   }
 
-  private fun addApplicableFragmentSpans(
+  private fun addApplicableStringFragmentSpans(
+    context: Context,
+    fragment: StringFragment,
+    sb: SpannableStringBuilder,
+    ops: MutableList<SetSpanOperation>,
+  ) {
+    when(fragment){
+      is SpanFragment -> addSpanFragmentSpan(
+        context = context,
+        fragment = fragment,
+        sb = sb,
+        ops = ops
+      )
+      is TextFragment -> addApplicableTextFragmentSpans(
+        context = context,
+        fragment = fragment,
+        sb = sb,
+        ops = ops
+      )
+    }
+  }
+
+  private fun addApplicableTextFragmentSpans(
       context: Context,
       fragment: TextFragment,
       sb: SpannableStringBuilder,
@@ -90,6 +115,35 @@ internal object TextLayoutUtils {
           end = end,
       )
     }
+  }
+
+  private fun addSpanFragmentSpan(
+    context: Context,
+    fragment: SpanFragment,
+    sb: SpannableStringBuilder,
+    ops: MutableList<SetSpanOperation>,
+  ) {
+    val start = sb.length
+
+    buildSpannableFromTextFragmentList(
+      context = context,
+      textFragmentList = fragment.subFragmentList,
+      sb = sb,
+      ops = ops,
+    )
+
+    val end = sb.length
+
+    ops.add(
+      SetSpanOperation(
+        start,
+        end,
+        ReactSpanSpan(
+          spanAttributeProps = fragment.spanAttributeProps,
+          radius = 4.0f,
+        ),
+      ),
+    )
   }
 
   @JvmStatic

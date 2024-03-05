@@ -48,7 +48,7 @@ AttributedStringBox TextInputShadowNode::attributedStringBoxToMeasure(
         : BaseTextShadowNode::getEmptyPlaceholder();
     auto textAttributes = getConcreteProps().getEffectiveTextAttributes(
         layoutContext.fontSizeMultiplier);
-    attributedString.appendFragment({string, textAttributes, {}});
+    attributedString.appendTextFragment({string, textAttributes, {}});
   }
 
   return AttributedStringBox{attributedString};
@@ -60,11 +60,15 @@ AttributedString TextInputShadowNode::getAttributedString(
       layoutContext.fontSizeMultiplier);
   auto attributedString = AttributedString{};
 
-  attributedString.appendFragment(AttributedString::Fragment{
-      .string = getConcreteProps().text,
-      .textAttributes = textAttributes,
-      // TODO: Is this really meant to be by value?
-      .parentShadowView = ShadowView{}});
+  const auto& text = getConcreteProps().text;
+
+  if (!text.empty()) {
+    attributedString.appendTextFragment(AttributedString::Fragment{
+        .string = text,
+        .textAttributes = textAttributes,
+        // TODO: Is this really meant to be by value?
+        .parentShadowView = ShadowView{}});
+  }
 
   auto attachments = Attachments{};
   BaseTextShadowNode::buildAttributedString(

@@ -57,7 +57,12 @@ const Content& ParagraphShadowNode::getContent(
       : LayoutDirection::LeftToRight;
   auto attributedString = AttributedString{};
   auto attachments = Attachments{};
-  buildAttributedString(textAttributes, *this, attributedString, attachments);
+  buildAttributedString(
+      textAttributes,
+      *this,
+      AttributedString::FragmentHandle::nil,
+      attributedString,
+      attachments);
 
   content_ = Content{
       attributedString, getConcreteProps().paragraphAttributes, attachments};
@@ -79,7 +84,7 @@ Content ParagraphShadowNode::getContentWithMeasuredAttachments(
   // Having enforced minimum size for text fragments doesn't make much sense.
   localLayoutConstraints.minimumSize = Size{0, 0};
 
-  auto& fragments = content.attributedString.getFragments();
+  auto& attributedString = content.attributedString;
 
   for (const auto& attachment : content.attachments) {
     auto laytableShadowNode =
@@ -88,6 +93,9 @@ Content ParagraphShadowNode::getContentWithMeasuredAttachments(
     if (laytableShadowNode == nullptr) {
       continue;
     }
+
+    auto& fragment =
+        attributedString.getFragment(attachment.textFragmentHandle).asText();
 
     auto size =
         laytableShadowNode->measure(layoutContext, localLayoutConstraints);
@@ -100,8 +108,7 @@ Content ParagraphShadowNode::getContentWithMeasuredAttachments(
     auto fragmentLayoutMetrics = LayoutMetrics{};
     fragmentLayoutMetrics.pointScaleFactor = layoutContext.pointScaleFactor;
     fragmentLayoutMetrics.frame.size = size;
-    fragments[attachment.fragmentIndex].parentShadowView.layoutMetrics =
-        fragmentLayoutMetrics;
+    fragment.parentShadowView.layoutMetrics = fragmentLayoutMetrics;
   }
 
   return content;
@@ -149,7 +156,7 @@ Size ParagraphShadowNode::measureContent(
     auto textAttributes = TextAttributes::defaultTextAttributes();
     textAttributes.fontSizeMultiplier = layoutContext.fontSizeMultiplier;
     textAttributes.apply(getConcreteProps().textAttributes);
-    attributedString.appendFragment({string, textAttributes, {}});
+    attributedString.appendTextFragment({string, textAttributes, {}});
   }
 
   TextLayoutContext textLayoutContext{};

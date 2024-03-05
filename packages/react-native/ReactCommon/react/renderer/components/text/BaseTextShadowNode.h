@@ -31,10 +31,10 @@ class BaseTextShadowNode {
     const ShadowNode* shadowNode;
 
     /*
-     * Index of the fragment in `AttributedString` that represents the
+     * Handle to the text fragment in `AttributedString` that represents the
      * the attachment.
      */
-    size_t fragmentIndex;
+    AttributedString::FragmentHandle textFragmentHandle;
   };
 
   /*
@@ -54,6 +54,7 @@ class BaseTextShadowNode {
   static void buildAttributedString(
       const TextAttributes& baseTextAttributes,
       const ShadowNode& parentNode,
+      const AttributedString::FragmentHandle& containerHandle,
       AttributedString& outAttributedString,
       Attachments& outAttachments);
 

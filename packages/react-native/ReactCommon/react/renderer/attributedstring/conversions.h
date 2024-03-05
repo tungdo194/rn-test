@@ -12,6 +12,7 @@
 #include <react/debug/react_native_expect.h>
 #include <react/renderer/attributedstring/AttributedString.h>
 #include <react/renderer/attributedstring/ParagraphAttributes.h>
+#include <react/renderer/attributedstring/SpanAttributes.h>
 #include <react/renderer/attributedstring/TextAttributes.h>
 #include <react/renderer/attributedstring/conversions.h>
 #include <react/renderer/attributedstring/primitives.h>
@@ -896,7 +897,8 @@ inline folly::dynamic toDynamic(const TextAttributes& textAttributes) {
   return _textAttributes;
 }
 
-inline folly::dynamic toDynamic(const AttributedString::Fragment& fragment) {
+inline folly::dynamic toDynamic(
+    const AttributedString::TextFragment& fragment) {
   folly::dynamic value = folly::dynamic::object();
 
   value["string"] = fragment.string;
@@ -917,7 +919,9 @@ inline folly::dynamic toDynamic(const AttributedString& attributedString) {
   auto value = folly::dynamic::object();
   auto fragments = folly::dynamic::array();
   for (auto fragment : attributedString.getFragments()) {
-    fragments.push_back(toDynamic(fragment));
+    if (fragment.getKind() != AttributedString::Fragment::Kind::Text)
+      continue;
+    fragments.push_back(toDynamic(fragment.asText()));
   }
   value("fragments", fragments);
   value(
@@ -940,12 +944,19 @@ constexpr static MapBuffer::Key AS_KEY_FRAGMENTS = 2;
 constexpr static MapBuffer::Key AS_KEY_CACHE_ID = 3;
 
 // constants for Fragment serialization
-constexpr static MapBuffer::Key FR_KEY_STRING = 0;
-constexpr static MapBuffer::Key FR_KEY_REACT_TAG = 1;
-constexpr static MapBuffer::Key FR_KEY_IS_ATTACHMENT = 2;
-constexpr static MapBuffer::Key FR_KEY_WIDTH = 3;
-constexpr static MapBuffer::Key FR_KEY_HEIGHT = 4;
-constexpr static MapBuffer::Key FR_KEY_TEXT_ATTRIBUTES = 5;
+constexpr static MapBuffer::Key FR_KEY_KIND = 0;
+
+// constants for TextFragment serialization
+constexpr static MapBuffer::Key TF_KEY_STRING = 1;
+constexpr static MapBuffer::Key TF_KEY_REACT_TAG = 2;
+constexpr static MapBuffer::Key TF_KEY_IS_ATTACHMENT = 3;
+constexpr static MapBuffer::Key TF_KEY_WIDTH = 4;
+constexpr static MapBuffer::Key TF_KEY_HEIGHT = 5;
+constexpr static MapBuffer::Key TF_KEY_TEXT_ATTRIBUTES = 6;
+
+// constants for SpanFragment serialization
+constexpr static MapBuffer::Key SF_KEY_FRAGMENTS = 1;
+constexpr static MapBuffer::Key SF_KEY_SPAN_ATTRIBUTES = 2;
 
 // constants for Text Attributes serialization
 constexpr static MapBuffer::Key TA_KEY_FOREGROUND_COLOR = 0;
@@ -976,6 +987,9 @@ constexpr static MapBuffer::Key TA_KEY_LINE_BREAK_STRATEGY = 25;
 constexpr static MapBuffer::Key TA_KEY_ROLE = 26;
 constexpr static MapBuffer::Key TA_KEY_TEXT_TRANSFORM = 27;
 
+// constants for Span Attributes serialization
+constexpr static MapBuffer::Key SA_KEY_TEXT_ATTRIBUTES = 0;
+
 // constants for ParagraphAttributes serialization
 constexpr static MapBuffer::Key PA_KEY_MAX_NUMBER_OF_LINES = 0;
 constexpr static MapBuffer::Key PA_KEY_ELLIPSIZE_MODE = 1;
@@ -983,6 +997,8 @@ constexpr static MapBuffer::Key PA_KEY_TEXT_BREAK_STRATEGY = 2;
 constexpr static MapBuffer::Key PA_KEY_ADJUST_FONT_SIZE_TO_FIT = 3;
 constexpr static MapBuffer::Key PA_KEY_INCLUDE_FONT_PADDING = 4;
 constexpr static MapBuffer::Key PA_KEY_HYPHENATION_FREQUENCY = 5;
+
+inline MapBuffer toMapBufferFragments(const AttributedString& attributedString);
 
 inline MapBuffer toMapBuffer(const ParagraphAttributes& paragraphAttributes) {
   auto builder = MapBufferBuilder();
@@ -1138,28 +1154,60 @@ inline MapBuffer toMapBuffer(const TextAttributes& textAttributes) {
   return builder.build();
 }
 
-inline MapBuffer toMapBuffer(const AttributedString::Fragment& fragment) {
+inline MapBuffer toMapBuffer(const SpanAttributes& spanAttributes) {
   auto builder = MapBufferBuilder();
 
-  builder.putString(FR_KEY_STRING, fragment.string);
-  if (fragment.parentShadowView.componentHandle) {
-    builder.putInt(FR_KEY_REACT_TAG, fragment.parentShadowView.tag);
-  }
-  if (fragment.isAttachment()) {
-    builder.putBool(FR_KEY_IS_ATTACHMENT, true);
-    builder.putDouble(
-        FR_KEY_WIDTH, fragment.parentShadowView.layoutMetrics.frame.size.width);
-    builder.putDouble(
-        FR_KEY_HEIGHT,
-        fragment.parentShadowView.layoutMetrics.frame.size.height);
-  }
-  auto textAttributesMap = toMapBuffer(fragment.textAttributes);
-  builder.putMapBuffer(FR_KEY_TEXT_ATTRIBUTES, textAttributesMap);
+  builder.putMapBuffer(
+      SA_KEY_TEXT_ATTRIBUTES, toMapBuffer(spanAttributes.textAttributes));
 
   return builder.build();
 }
 
-inline MapBuffer toMapBuffer(const AttributedString& attributedString) {
+inline MapBuffer toMapBuffer(const AttributedString::TextFragment& fragment) {
+  auto builder = MapBufferBuilder();
+
+  builder.putInt(FR_KEY_KIND, AttributedString::Fragment::Kind::Text);
+  builder.putString(TF_KEY_STRING, fragment.string);
+  if (fragment.parentShadowView.componentHandle) {
+    builder.putInt(TF_KEY_REACT_TAG, fragment.parentShadowView.tag);
+  }
+  if (fragment.isAttachment()) {
+    builder.putBool(TF_KEY_IS_ATTACHMENT, true);
+    builder.putDouble(
+        TF_KEY_WIDTH, fragment.parentShadowView.layoutMetrics.frame.size.width);
+    builder.putDouble(
+        TF_KEY_HEIGHT,
+        fragment.parentShadowView.layoutMetrics.frame.size.height);
+  }
+  auto textAttributesMap = toMapBuffer(fragment.textAttributes);
+  builder.putMapBuffer(TF_KEY_TEXT_ATTRIBUTES, textAttributesMap);
+
+  return builder.build();
+}
+
+inline MapBuffer toMapBuffer(const AttributedString::SpanFragment& fragment) {
+  auto builder = MapBufferBuilder();
+
+  builder.putInt(FR_KEY_KIND, AttributedString::Fragment::Kind::Span);
+  builder.putMapBuffer(
+      SF_KEY_SPAN_ATTRIBUTES, toMapBuffer(fragment.spanAttributes));
+  builder.putMapBuffer(
+      SF_KEY_FRAGMENTS, toMapBufferFragments(fragment.attributedSubstring));
+
+  return builder.build();
+}
+
+inline MapBuffer toMapBuffer(const AttributedString::Fragment& fragment) {
+  switch (fragment.getKind()) {
+    case AttributedString::Fragment::Kind::Text:
+      return toMapBuffer(fragment.asText());
+    case AttributedString::Fragment::Kind::Span:
+      return toMapBuffer(fragment.asSpan());
+  }
+}
+
+inline MapBuffer toMapBufferFragments(
+    const AttributedString& attributedString) {
   auto fragmentsBuilder = MapBufferBuilder();
 
   int index = 0;
@@ -1167,14 +1215,20 @@ inline MapBuffer toMapBuffer(const AttributedString& attributedString) {
     fragmentsBuilder.putMapBuffer(index++, toMapBuffer(fragment));
   }
 
+  return fragmentsBuilder.build();
+}
+
+inline MapBuffer toMapBuffer(const AttributedString& attributedString) {
   auto builder = MapBufferBuilder();
+
   size_t hash =
       std::hash<facebook::react::AttributedString>{}(attributedString);
   // TODO: This truncates half the hash
   builder.putInt(AS_KEY_HASH, static_cast<int>(hash));
   builder.putString(AS_KEY_STRING, attributedString.getString());
-  auto fragmentsMap = fragmentsBuilder.build();
-  builder.putMapBuffer(AS_KEY_FRAGMENTS, fragmentsMap);
+  builder.putMapBuffer(
+      AS_KEY_FRAGMENTS, toMapBufferFragments(attributedString));
+
   return builder.build();
 }
 

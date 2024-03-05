@@ -40,14 +40,18 @@ AttributedString AndroidTextInputShadowNode::getAttributedString() const {
   auto attributedString = AttributedString{};
   auto attachments = BaseTextShadowNode::Attachments{};
   BaseTextShadowNode::buildAttributedString(
-      childTextAttributes, *this, attributedString, attachments);
+      childTextAttributes,
+      *this,
+      AttributedString::FragmentHandle::nil,
+      attributedString,
+      attachments);
 
   // BaseTextShadowNode only gets children. We must detect and prepend text
   // value attributes manually.
   if (!getConcreteProps().text.empty()) {
     auto textAttributes = TextAttributes::defaultTextAttributes();
     textAttributes.apply(getConcreteProps().textAttributes);
-    auto fragment = AttributedString::Fragment{};
+    auto fragment = AttributedString::TextFragment{};
     fragment.string = getConcreteProps().text;
     fragment.textAttributes = textAttributes;
     // If the TextInput opacity is 0 < n < 1, the opacity of the TextInput and
@@ -55,7 +59,7 @@ AttributedString AndroidTextInputShadowNode::getAttributedString() const {
     // that effect.
     fragment.textAttributes.backgroundColor = clearColor();
     fragment.parentShadowView = ShadowView(*this);
-    attributedString.prependFragment(fragment);
+    attributedString.prependTextFragment(fragment);
   }
 
   return attributedString;
@@ -71,7 +75,7 @@ AttributedString AndroidTextInputShadowNode::getPlaceholderAttributedString()
     const {
   // Return placeholder text, since text and children are empty.
   auto textAttributedString = AttributedString{};
-  auto fragment = AttributedString::Fragment{};
+  auto fragment = AttributedString::TextFragment{};
   fragment.string = getConcreteProps().placeholder;
 
   if (fragment.string.empty()) {
@@ -81,11 +85,11 @@ AttributedString AndroidTextInputShadowNode::getPlaceholderAttributedString()
   auto textAttributes = TextAttributes::defaultTextAttributes();
   textAttributes.apply(getConcreteProps().textAttributes);
 
-  // If there's no text, it's possible that this Fragment isn't actually
-  // appended to the AttributedString (see implementation of appendFragment)
+  // If there's no text, it's possible that this TextFragment isn't actually
+  // appended to the AttributedString (see implementation of appendTextFragment)
   fragment.textAttributes = textAttributes;
   fragment.parentShadowView = ShadowView(*this);
-  textAttributedString.appendFragment(fragment);
+  textAttributedString.appendTextFragment(fragment);
 
   return textAttributedString;
 }
@@ -107,7 +111,7 @@ AttributedString AndroidTextInputShadowNode::getMostRecentAttributedString()
   // the parent which has changed Thus, we can't directly compare the entire
   // AttributedString
   bool treeAttributedStringChanged =
-      !state.reactTreeAttributedString.compareTextAttributesWithoutFrame(
+      !state.reactTreeAttributedString.isContentEqual(
           reactTreeAttributedString);
 
   return (

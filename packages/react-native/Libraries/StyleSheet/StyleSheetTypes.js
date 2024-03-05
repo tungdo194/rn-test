@@ -55,10 +55,10 @@ export type CursorValue = 'auto' | 'pointer';
 type ____LayoutStyle_Internal = $ReadOnly<{
   /** `display` sets the display type of this component.
    *
-   *  It works similarly to `display` in CSS, but only support 'flex' and 'none'.
-   *  'flex' is the default.
+   *  It works similarly to `display` in CSS, but only support 'flex', 'inline and
+   * 'none'. 'flex' is the default.
    */
-  display?: 'none' | 'flex',
+  display?: 'none' | 'flex' | 'inline',
 
   /** `width` sets the width of this component.
    *
