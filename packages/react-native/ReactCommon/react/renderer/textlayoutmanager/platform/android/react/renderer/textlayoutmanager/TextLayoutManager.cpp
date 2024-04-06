@@ -16,7 +16,6 @@
 #include <react/renderer/mapbuffer/MapBuffer.h>
 #include <react/renderer/mapbuffer/MapBufferBuilder.h>
 #include <react/renderer/telemetry/TransactionTelemetry.h>
-#include <react/utils/CoreFeatures.h>
 
 using namespace facebook::jni;
 
@@ -158,11 +157,7 @@ Size measureAndroidComponentMapBuffer(
 
 TextLayoutManager::TextLayoutManager(
     const ContextContainer::Shared& contextContainer)
-    : contextContainer_(contextContainer),
-      measureCache_(
-          CoreFeatures::cacheLastTextMeasurement
-              ? 8096
-              : kSimpleThreadSafeCacheSizeCap) {}
+    : contextContainer_(contextContainer), measureCache_() {}
 
 void* TextLayoutManager::getNativeTextLayoutManager() const {
   return self_;
@@ -172,8 +167,7 @@ TextMeasurement TextLayoutManager::measure(
     const AttributedStringBox& attributedStringBox,
     const ParagraphAttributes& paragraphAttributes,
     const TextLayoutContext& layoutContext,
-    LayoutConstraints layoutConstraints,
-    std::shared_ptr<void> /* hostTextStorage */) const {
+    LayoutConstraints layoutConstraints) const {
   auto& attributedString = attributedStringBox.getValue();
 
   auto measurement = measureCache_.get(
@@ -196,12 +190,6 @@ TextMeasurement TextLayoutManager::measure(
 
   measurement.size = layoutConstraints.clamp(measurement.size);
   return measurement;
-}
-std::shared_ptr<void> TextLayoutManager::getHostTextStorage(
-    const AttributedString& /* attributedStringBox */,
-    const ParagraphAttributes& /* paragraphAttributes */,
-    LayoutConstraints /* layoutConstraints */) const {
-  return nullptr;
 }
 
 TextMeasurement TextLayoutManager::measureCachedSpannableById(
@@ -281,7 +269,7 @@ LinesMeasurements TextLayoutManager::measureLines(
 }
 
 TextMeasurement TextLayoutManager::doMeasure(
-    AttributedString attributedString,
+    const AttributedString& attributedString,
     const ParagraphAttributes& paragraphAttributes,
     LayoutConstraints layoutConstraints) const {
   layoutConstraints.maximumSize.height = std::numeric_limits<Float>::infinity();
@@ -340,7 +328,7 @@ TextMeasurement TextLayoutManager::doMeasure(
 }
 
 TextMeasurement TextLayoutManager::doMeasureMapBuffer(
-    AttributedString attributedString,
+    const AttributedString& attributedString,
     const ParagraphAttributes& paragraphAttributes,
     LayoutConstraints layoutConstraints) const {
   layoutConstraints.maximumSize.height = std::numeric_limits<Float>::infinity();

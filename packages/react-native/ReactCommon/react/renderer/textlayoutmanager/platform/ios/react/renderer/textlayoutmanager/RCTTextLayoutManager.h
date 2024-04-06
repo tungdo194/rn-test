@@ -26,24 +26,17 @@ using RCTTextLayoutFragmentEnumerationBlock =
  */
 @interface RCTTextLayoutManager : NSObject
 
-- (facebook::react::TextMeasurement)measureAttributedString:(facebook::react::AttributedString)attributedString
+- (facebook::react::TextMeasurement)measureAttributedString:(const facebook::react::AttributedString &)attributedString
                                         paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
-                                          layoutConstraints:(facebook::react::LayoutConstraints)layoutConstraints
-                                                textStorage:(NSTextStorage *_Nullable)textStorage;
+                                          layoutConstraints:(facebook::react::LayoutConstraints)layoutConstraints;
 
 - (facebook::react::TextMeasurement)measureNSAttributedString:(NSAttributedString *)attributedString
                                           paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
-                                            layoutConstraints:(facebook::react::LayoutConstraints)layoutConstraints
-                                                  textStorage:(NSTextStorage *_Nullable)textStorage;
+                                            layoutConstraints:(facebook::react::LayoutConstraints)layoutConstraints;
 
-- (NSTextStorage *)textStorageForAttributesString:(facebook::react::AttributedString)attributedString
-                              paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
-                                             size:(CGSize)size;
-
-- (void)drawAttributedString:(facebook::react::AttributedString)attributedString
+- (void)drawAttributedString:(const facebook::react::AttributedString &)attributedString
          paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
                        frame:(CGRect)frame
-                 textStorage:(NSTextStorage *_Nullable)textStorage
            drawHighlightPath:(void (^_Nullable)(UIBezierPath *highlightPath))block;
 
 - (facebook::react::LinesMeasurements)getLinesForAttributedString:(facebook::react::AttributedString)attributedString
@@ -52,12 +45,12 @@ using RCTTextLayoutFragmentEnumerationBlock =
                                                              size:(CGSize)size;
 
 - (facebook::react::SharedEventEmitter)
-    getEventEmitterWithAttributeString:(facebook::react::AttributedString)attributedString
+    getEventEmitterWithAttributeString:(const facebook::react::AttributedString &)attributedString
                    paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
                                  frame:(CGRect)frame
                                atPoint:(CGPoint)point;
 
-- (void)getRectWithAttributedString:(facebook::react::AttributedString)attributedString
+- (void)getRectWithAttributedString:(const facebook::react::AttributedString &)attributedString
                 paragraphAttributes:(facebook::react::ParagraphAttributes)paragraphAttributes
                  enumerateAttribute:(NSString *)enumerateAttribute
                               frame:(CGRect)frame

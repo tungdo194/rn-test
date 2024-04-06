@@ -47,12 +47,6 @@ class TextLayoutManager {
       const AttributedStringBox& attributedStringBox,
       const ParagraphAttributes& paragraphAttributes,
       const TextLayoutContext& layoutContext,
-      LayoutConstraints layoutConstraints,
-      std::shared_ptr<void> /* hostTextStorage */) const;
-
-  std::shared_ptr<void> getHostTextStorage(
-      const AttributedString& attributedString,
-      const ParagraphAttributes& paragraphAttributes,
       LayoutConstraints layoutConstraints) const;
 
   /**
@@ -81,12 +75,12 @@ class TextLayoutManager {
 
  private:
   TextMeasurement doMeasure(
-      AttributedString attributedString,
+      const AttributedString& attributedString,
       const ParagraphAttributes& paragraphAttributes,
       LayoutConstraints layoutConstraints) const;
 
   TextMeasurement doMeasureMapBuffer(
-      AttributedString attributedString,
+      const AttributedString& attributedString,
       const ParagraphAttributes& paragraphAttributes,
       LayoutConstraints layoutConstraints) const;
 

@@ -63,6 +63,7 @@ class ParagraphShadowNode final : public ConcreteViewShadowNode<
 #pragma mark - LayoutableShadowNode
 
   void layout(LayoutContext layoutContext) override;
+
   Size measureContent(
       const LayoutContext& layoutContext,
       const LayoutConstraints& layoutConstraints) const override;
@@ -97,10 +98,17 @@ class ParagraphShadowNode final : public ConcreteViewShadowNode<
    */
   void updateStateIfNeeded(const Content& content);
 
+  std::shared_ptr<TextLayoutManager const> textLayoutManager_;
+
   /*
    * Cached content of the subtree started from the node.
    */
   mutable std::optional<Content> content_{};
+
+  /*
+   * Cached result of last Size measureContent operation.
+   */
+  mutable TextMeasurement lastMeasurement_{};
 };
 
 } // namespace facebook::react
