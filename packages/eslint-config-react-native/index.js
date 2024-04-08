@@ -13,11 +13,11 @@ const reactHooks = require('eslint-plugin-react-hooks');
 const reactNative = require('eslint-plugin-react-native');
 const reactNativeCommunity = require('@react-native/eslint-plugin');
 const jest = require('eslint-plugin-jest');
-const ftFlow = require('eslint-plugin-ft-flow');
 const babelParser = require('@babel/eslint-parser');
 const prettier = require('eslint-config-prettier');
 const typescriptParser = require('@typescript-eslint/parser');
 const typescriptPlugin = require('@typescript-eslint/eslint-plugin');
+const ftFlow = require('eslint-plugin-ft-flow');
 
 module.exports = [
   prettier,
@@ -91,7 +91,7 @@ module.exports = [
         ecmaFeatures: {
           jsx: true,
         },
-      },      
+      },
       globals: {
         __DEV__: true,
         __dirname: false,
@@ -336,7 +336,7 @@ module.exports = [
       // React-Native Plugin
       // The following rules are made available via `eslint-plugin-react-native`
 
-      // 'react-native/no-inline-styles': 1,
+      'react-native/no-inline-styles': 1,
 
       // Jest Plugin
       // The following rules are made available via `eslint-plugin-jest`.
