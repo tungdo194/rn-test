@@ -39,6 +39,7 @@
 
 @implementation RCTAppDelegate
 
+/** TEST IGNORE
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   [self _setUpFeatureFlags];
@@ -68,6 +69,7 @@
 
   return YES;
 }
+END IGNORE */
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
