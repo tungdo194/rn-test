@@ -10,6 +10,7 @@ package com.facebook.react.devsupport;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,8 +23,10 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -1163,5 +1166,49 @@ public abstract class DevSupportManagerBase implements DevSupportManager {
   public void openDebugger() {
     mDevServerHelper.openDebugger(
         mCurrentContext, mApplicationContext.getString(R.string.catalyst_open_debugger_error));
+  }
+
+  private @Nullable AlertDialog mPausedInDebuggerDialog;
+
+  @Override
+  public void showPausedInDebuggerOverlay(
+      String message, PausedInDebuggerOverlayCommandListener listener) {
+    UiThreadUtil.runOnUiThread(
+        () -> {
+          if (mPausedInDebuggerDialog != null) {
+            mPausedInDebuggerDialog.dismiss();
+          }
+          Activity context = mReactInstanceDevHelper.getCurrentActivity();
+          if (context == null || context.isFinishing()) {
+            return;
+          }
+          View dialogView =
+              LayoutInflater.from(context).inflate(R.layout.paused_in_debugger_view, null);
+          mPausedInDebuggerDialog = new Dialog(context);
+          mPausedInDebuggerDialog.setContentView(dialogView);
+          mPausedInDebuggerDialog.setCancelable(false);
+          TextView pausedText = dialogView.findViewById(R.id.paused_text);
+          pausedText.setText(message);
+          View resumeButton = dialogView.findViewById(R.id.resume_button);
+          resumeButton.setOnClickListener((v) -> listener.onResume());
+          View stepOverButton = dialogView.findViewById(R.id.step_over_button);
+          stepOverButton.setOnClickListener((v) -> listener.onStepOver());
+          Window dialogWindow = mPausedInDebuggerDialog.getWindow();
+          if (dialogWindow != null) {
+            dialogWindow.setGravity(Gravity.TOP);
+          }
+          mPausedInDebuggerDialog.show();
+        });
+  }
+
+  @Override
+  public void hidePausedInDebuggerOverlay() {
+    UiThreadUtil.runOnUiThread(
+        () -> {
+          if (mPausedInDebuggerDialog != null) {
+            mPausedInDebuggerDialog.dismiss();
+            mPausedInDebuggerDialog = null;
+          }
+        });
   }
 }
