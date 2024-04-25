@@ -778,6 +778,12 @@ void FabricMountingManager::executeMount(
 void FabricMountingManager::preallocateShadowView(
     SurfaceId surfaceId,
     const ShadowView& shadowView) {
+  if (ReactNativeFeatureFlags::batchRenderingUpdatesInEventLoop()) {
+    // FIXME T186151779: View preallocation is not compatible with batched
+    // rendering in the new event loop
+    return;
+  }
+
   {
     std::lock_guard lock(allocatedViewsMutex_);
     auto allocatedViewsIterator = allocatedViewRegistry_.find(surfaceId);
