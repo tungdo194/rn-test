@@ -16,6 +16,9 @@
 
 namespace facebook::react {
 
+class RuntimeScheduler;
+struct Task;
+
 /*
  * A HostObject subclass representing the result of a setTimeout call.
  * Can be used as an argument to clearTimeout.
@@ -65,6 +68,9 @@ class TimerManager {
 
   void setRuntimeExecutor(RuntimeExecutor runtimeExecutor) noexcept;
 
+  void setRuntimeScheduler(
+      std::weak_ptr<RuntimeScheduler> runtimeScheduler) noexcept;
+
   void callReactNativeMicrotasks(jsi::Runtime& runtime);
 
   void callTimer(uint32_t);
@@ -96,7 +102,18 @@ class TimerManager {
       jsi::Runtime& runtime,
       std::shared_ptr<TimerHandle> handle);
 
+  std::shared_ptr<TimerHandle> createIdleCallback(jsi::Function&& callback);
+
+  std::shared_ptr<TimerHandle> createIdleCallbackWithTimeout(
+      jsi::Function&& callback,
+      int32_t timeout);
+
+  void clearIdleCallback(
+      jsi::Runtime& runtime,
+      std::shared_ptr<TimerHandle> idleCallbackHandle);
+
   RuntimeExecutor runtimeExecutor_;
+  std::weak_ptr<RuntimeScheduler> runtimeScheduler_;
   std::unique_ptr<PlatformTimerRegistry> platformTimerRegistry_;
 
   // A map (id => callback func) of the currently active JS timers
@@ -105,6 +122,13 @@ class TimerManager {
   // Each timeout that is registered on this queue gets a sequential id.  This
   // is the global count from which those are assigned.
   uint32_t timerIndex_{0};
+
+  // A map (id => task func) of the currently active JS idleCallbacks
+  std::unordered_map<uint32_t, std::shared_ptr<Task>> idleCallbacks_;
+
+  // Each idleCallback that is registered on this queue gets a sequential id.
+  // This is the global count from which those are assigned.
+  uint32_t idleCallbackIndex_{0};
 
   // The React Native microtask queue is used to back public APIs including
   // `queueMicrotask`, `clearImmediate`, and `setImmediate` (which is used by
