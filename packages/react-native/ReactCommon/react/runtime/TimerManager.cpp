@@ -8,6 +8,8 @@
 #include "TimerManager.h"
 
 #include <cxxreact/SystraceSection.h>
+#include <react/renderer/runtimescheduler/RuntimeScheduler.h>
+#include <chrono>
 #include <utility>
 
 namespace facebook::react {
@@ -19,6 +21,11 @@ TimerManager::TimerManager(
 void TimerManager::setRuntimeExecutor(
     RuntimeExecutor runtimeExecutor) noexcept {
   runtimeExecutor_ = runtimeExecutor;
+}
+
+void TimerManager::setRuntimeScheduler(
+    std::weak_ptr<RuntimeScheduler> runtimeScheduler) noexcept {
+  runtimeScheduler_ = runtimeScheduler;
 }
 
 std::shared_ptr<TimerHandle> TimerManager::createReactNativeMicrotask(
@@ -144,6 +151,21 @@ void TimerManager::callTimer(uint32_t timerID) {
     }
   });
 }
+
+std::shared_ptr<TimerHandle> TimerManager::createIdleCallback(
+    jsi::Function&& callback) {
+  return nullptr;
+}
+
+std::shared_ptr<TimerHandle> TimerManager::createIdleCallbackWithTimeout(
+    jsi::Function&& callback,
+    int32_t timeout) {
+  return nullptr;
+}
+
+void TimerManager::clearIdleCallback(
+    jsi::Runtime& runtime,
+    std::shared_ptr<TimerHandle> idleCallbackHandle) {}
 
 void TimerManager::attachGlobals(jsi::Runtime& runtime) {
   // Install host functions for timers.
