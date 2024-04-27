@@ -13,6 +13,7 @@ import com.facebook.infer.annotation.Nullsafe;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.CatalystInstance;
+import com.facebook.react.bridge.JavaScriptContextHolder;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.JavaScriptModuleRegistry;
 import com.facebook.react.bridge.NativeArray;
@@ -58,6 +59,12 @@ class BridgelessReactContext extends ReactApplicationContext implements EventDis
     return true;
   }
 
+  @Nullable
+  @Override
+  public JavaScriptContextHolder getJavaScriptContextHolder() {
+    return null;
+  }
+
   @Override
   public EventDispatcher getEventDispatcher() {
     return mReactHost.getEventDispatcher();
@@ -86,15 +93,29 @@ class BridgelessReactContext extends ReactApplicationContext implements EventDis
     return new BridgelessCatalystInstance(mReactHost);
   }
 
+  @Deprecated
+  @Override
+  public boolean hasActiveCatalystInstance() {
+    return hasActiveReactInstance();
+  }
+
   @Override
   public boolean hasActiveReactInstance() {
     return mReactHost.isInstanceInitialized();
   }
 
   @Override
+  public boolean hasCatalystInstance() {
+    return false;
+  }
+
+  @Override
   public boolean hasReactInstance() {
     return mReactHost.isInstanceInitialized();
   }
+
+  @Override
+  public void destroy() {}
 
   DevSupportManager getDevSupportManager() {
     return mReactHost.getDevSupportManager();
